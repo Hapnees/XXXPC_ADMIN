@@ -1,0 +1,155 @@
+.wrapper {
+	@apply flex flex-col items-center;
+}
+
+.panel {
+	@apply flex items-center gap-4 mb-2 ml-2;
+}
+
+.container__menu {
+	@apply inline-flex flex-col items-center;
+	margin-top: 10px;
+	margin-bottom: 30px;
+	width: 100%;
+	max-width: 1740px;
+	overflow: auto;
+}
+
+.top__menu {
+	display: flex;
+
+	>li {
+		@apply relative flex items-center justify-center gap-3 px-4 py-1;
+		cursor: pointer;
+		white-space: nowrap;
+		min-width: 200px;
+		max-width: 200px;
+		font-weight: 600;
+		font-size: 18px;
+		background-color: #0c0e14;
+		border-left: 1px solid #1a202c;
+		transition: background-color .3s;
+
+		&:hover {
+			background-color: #2d3748;
+		}
+
+		&:nth-child(1),
+		&:nth-child(2) {
+			max-width: 70px;
+			min-width: 70px;
+			text-align: center
+		}
+
+	}
+}
+
+.menu {
+	display: flex;
+	transition: background-color .3s;
+
+	&:hover {
+		background-color: rgba(50, 115, 181, 0.608);
+	}
+
+	>li,
+	>a {
+		@apply flex items-center;
+		border: 1px solid #1a202c;
+		transition: background-color .3s;
+		cursor: pointer;
+		white-space: nowrap;
+		min-width: 200px;
+		max-width: 200px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+
+		p {
+			@apply w-[180px] overflow-hidden text-ellipsis px-2 py-2;
+		}
+	}
+}
+
+.short__element {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	max-width: 70px !important;
+	min-width: 70px !important;
+}
+
+.date__element {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.checkbox {
+	cursor: pointer;
+}
+
+
+.center {
+	text-align: center;
+}
+
+.input {
+	background-color: transparent;
+}
+
+.special {
+	@apply flex;
+
+	>p {
+		@apply flex items-center justify-center;
+		height: 100%;
+		transition: background-color .3s;
+
+		&:first-child {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			width: 30%;
+		}
+
+		&:nth-child(2) {
+			width: 70%;
+		}
+	}
+}
+
+.arrow {
+	opacity: .5;
+	padding: 4px;
+	width: 25px;
+	height: 25px;
+	border-radius: 100%;
+	background-color: #17091563;
+	transition: opacity .3s;
+
+	animation: opacity .3s ease-in-out;
+
+	&:hover {
+		opacity: 1;
+	}
+}
+
+.arrow__up {
+	@extend .arrow;
+	transform: rotate(-90deg)
+}
+
+.arrow__down {
+	@extend .arrow;
+	transform: rotate(90deg)
+}
+
+@keyframes opacity {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: .5;
+	}
+}

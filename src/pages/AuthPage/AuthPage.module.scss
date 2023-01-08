@@ -1,0 +1,25 @@
+.wrapper {
+	@apply flex justify-center items-center;
+	margin-top: 200px;
+}
+
+.container {
+	@apply flex flex-col gap-4 px-8 py-4 rounded-md;
+	border: 1px solid #1e2533;
+	box-shadow: 0 0 5px #000;
+}
+
+.button {
+	@apply py-1;
+	width: 100%;
+	font-size: 18px;
+	color: #edf2f7;
+	border: 1px solid #293245;
+	border-radius: 6px;
+	transition: background-color .3s, border-color .3s;
+
+	&:hover {
+		background-color: #1c212e;
+		border-color: transparent;
+	}
+}

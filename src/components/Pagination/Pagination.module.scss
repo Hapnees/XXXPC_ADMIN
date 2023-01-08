@@ -1,0 +1,16 @@
+.menu {
+	@apply flex items-center gap-2;
+
+	>li {
+
+		@apply px-4 py-2;
+		background-color: #434e62;
+		cursor: pointer;
+		border-radius: 6px;
+		transition: background-color .3s;
+
+		&:hover {
+			background-color: #2d3748;
+		}
+	}
+}

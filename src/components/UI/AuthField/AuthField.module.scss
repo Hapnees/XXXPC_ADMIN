@@ -1,0 +1,24 @@
+.input {
+	@apply px-2 py-1 rounded-md;
+	border: 1px solid #743b6c;
+	font-size: 18px;
+	width: 280px;
+	background-color: #001;
+	color: #ffcffa;
+	transition: border-color .3s, box-shadow .3s;
+
+	&:hover,
+	&:focus {
+		border-color: #a7589d;
+		box-shadow: 0 0 3px #a7589d;
+	}
+
+	&::placeholder {
+		color: #a87ba3;
+	}
+}
+
+.wrapper__error {
+	@apply self-start flex items-center gap-2 mt-2;
+	color: #58d6ba;
+}

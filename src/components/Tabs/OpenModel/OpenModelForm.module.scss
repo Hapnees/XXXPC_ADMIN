@@ -1,0 +1,57 @@
+.wrapper {
+	color: #edf2f7;
+}
+
+.container {
+	@apply mt-12 mx-auto;
+	border: 1px solid #1a202c;
+	border-radius: 6px;
+	box-shadow: 0 0 5px #000;
+	height: 700px;
+}
+
+.top__content {
+	@apply px-6 py-4 gap-3;
+	border-bottom: 1px solid #1a202c;
+}
+
+
+.container__menu {
+	@apply px-3 py-4;
+}
+
+.menu {
+	display: grid;
+	grid-template-columns: repeat(2, 180px);
+	grid-gap: 8px;
+
+	>li {
+		@apply flex flex-col items-center gap-2 py-2 px-2;
+		cursor: pointer;
+		background-color: #1a202c;
+		box-shadow: 0 0 5px #000;
+		border-radius: 6px;
+		transition: background-color .3s;
+
+		&:hover {
+			background-color: #10131b;
+		}
+
+		&:hover>p,
+		&:hover>.icon {
+			color: #79849f;
+		}
+
+		>p {
+			transition: color .3s;
+			color: #c1c8db;
+		}
+	}
+}
+
+.icon {
+	height: 50px;
+	width: 50px;
+	color: #b9c0d2;
+	transition: color .3s;
+}

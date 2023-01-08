@@ -1,0 +1,39 @@
+.button {
+	@apply flex items-center gap-2 px-2;
+	border-radius: 6px;
+	background-color: #434e62;
+	transition: background-color .3s;
+	height: 30px;
+}
+
+.button__update {
+	@extend .button;
+
+	&:hover {
+		background-color: rgba(146, 146, 0, 0.652)
+	}
+}
+
+.button__create {
+	@extend .button;
+
+	&:hover {
+		background-color: rgba(44, 146, 0, 0.652)
+	}
+}
+
+.button__delete {
+	@extend .button;
+
+	&:hover {
+		background-color: rgba(185, 34, 0, 0.652)
+	}
+}
+
+.button__back {
+	@extend .button;
+
+	&:hover {
+		background-color: rgba(185, 166, 0, 0.652)
+	}
+}

@@ -1,0 +1,31 @@
+.menu {
+	@apply flex flex-col gap-2 mt-3;
+
+	>li {
+		@apply relative flex items-center;
+
+		>p {
+			@apply w-[200px] text-center py-2 shrink-0;
+		}
+	}
+}
+
+.select {
+	@apply px-2;
+	cursor: pointer;
+	width: 235px;
+	height: 35px;
+	background-color: #1a202c;
+}
+
+.button {
+	@apply self-end px-12 py-1 mt-2;
+	cursor: pointer;
+	border-radius: 6px;
+	background-color: #434e62;
+	transition: background-color .3s;
+
+	&:hover {
+		background-color: #232934;
+	}
+}

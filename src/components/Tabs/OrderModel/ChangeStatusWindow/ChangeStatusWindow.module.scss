@@ -1,0 +1,90 @@
+.wrapper {
+	@apply relative bg-prisma-blue px-6 py-4;
+}
+
+.title {
+	@apply tracking-wide;
+	text-align: center;
+	font-size: 22px;
+}
+
+.status__title {
+	@apply w-[200px] h-[40px] flex justify-center items-center;
+	background-color: #434e62;
+}
+
+.description__title {
+	@apply w-[450px] flex items-center justify-center;
+	background-color: #0e1118;
+}
+
+.status__value {
+	@apply w-[200px] h-[50px] flex justify-center items-center cursor-pointer;
+	font-size: 18px;
+	transition: background-color .3s
+}
+
+.description__value {
+	@apply w-[450px] flex items-center px-4;
+	background-color: #0e1118;
+	color: #d2dfff;
+}
+
+.status__clear {
+	@extend .status__value;
+
+	background-color: #252e3f;
+
+	&:hover {
+		background-color: #1a202c;
+	}
+}
+
+.status__pending {
+	@extend .status__value;
+	background-color: #9f9501;
+
+	&:hover {
+		background-color: #847c01;
+	}
+}
+
+.status__in_process {
+	@extend .status__value;
+
+	background-color: #8eaf34;
+
+	&:hover {
+		background-color: #759129;
+	}
+}
+
+.status__completed {
+	@extend .status__value;
+
+	background-color: #43b239;
+
+	&:hover {
+		background-color: #3a9b31;
+	}
+}
+
+.status__stopped {
+	@extend .status__value;
+
+	background-color: #27a4ab;
+
+	&:hover {
+		background-color: #22898e;
+	}
+}
+
+.status__rejected {
+	@extend .status__value;
+
+	background-color: #b84040;
+
+	&:hover {
+		background-color: #9b3636;
+	}
+}

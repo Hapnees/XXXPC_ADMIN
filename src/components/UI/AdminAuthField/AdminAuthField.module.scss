@@ -1,0 +1,21 @@
+.input {
+	@apply px-2 py-1;
+	font-size: 18px;
+	border-radius: 6px;
+	width: 100%;
+	background-color: #0c0e14;
+	border: 1px solid #141922;
+	transition: background-color .3s;
+	margin-bottom: 5px;
+
+	&:hover,
+	&:focus {
+		background-color: #010101;
+		box-shadow: 0 0 5px black;
+	}
+}
+
+.wrapper__error {
+	@apply items-center flex gap-2;
+	color: rgb(255, 111, 111);
+}

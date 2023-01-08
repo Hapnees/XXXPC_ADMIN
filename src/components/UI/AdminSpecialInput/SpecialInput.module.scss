@@ -1,0 +1,19 @@
+.input {
+	@apply px-2 py-1;
+	color: #edf2f7;
+	background-color: #1a202c;
+	border-radius: 6px;
+	width: 100%;
+	font-size: 18px;
+	transition: background-color .3s;
+
+	&:hover,
+	&:focus {
+		background-color: #0e1118;
+		box-shadow: 0 0 5px #000;
+	}
+
+	&::placeholder {
+		color: #3c525a;
+	}
+}

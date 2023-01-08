@@ -1,0 +1,47 @@
+.wrapper {
+	@apply relative flex flex-col px-4 py-2;
+	font-size: 18px;
+	background-color: #141823;
+	border-radius: 6px;
+	// width: 450px;
+	min-height: 400px;
+	z-index: 2000;
+}
+
+.input {
+	@apply px-2 py-[2px];
+	width: 100%;
+	font-size: 18px;
+	background-color: #0c0e14;
+}
+
+.wrapper__icon__add {
+	@apply flex items-center gap-2 cursor-pointer p-1;
+	border-radius: 6px;
+	transition: background-color .3s;
+
+	&:hover {
+		background: #2e3744;
+	}
+}
+
+.icon__add {
+	@apply p-2;
+	border-radius: 6px;
+	background-color: #495467;
+}
+
+.menu {
+	@apply flex flex-col gap-2 grow;
+}
+
+.button {
+	@apply py-1;
+	border-radius: 6px;
+	background-color: #495467;
+	transition: background-color .3s;
+
+	&:hover {
+		background-color: #2b323d;
+	}
+}

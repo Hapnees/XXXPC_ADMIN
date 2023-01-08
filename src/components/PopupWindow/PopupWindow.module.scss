@@ -1,0 +1,13 @@
+.wrapper {
+	@apply fixed top-[183px];
+
+	>li {
+		@apply w-[200px] px-4 py-1;
+		background-color: #0c0e14;
+		transition: background-color .3s;
+
+		&:hover {
+			background-color: #2d3748;
+		}
+	}
+}
