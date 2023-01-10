@@ -51,9 +51,7 @@ const RepairCardCreate: FC<IProps> = ({
   } = useAdminGetRepairCardDetailsQuery(id, { skip: !isEdit })
   const buttonTitle = isEdit ? 'Обновить' : 'Создать'
 
-  const [slug, setSlug] = useState<RepairCardSlug>(
-    selectData.filter(el => !slugs.includes(el))[0].value
-  )
+  const [slug, setSlug] = useState<RepairCardSlug>(slugs[0].value)
 
   const [title, setTitle] = useState<string>('')
   const [description, setDescription] = useState<string>(
@@ -127,6 +125,9 @@ const RepairCardCreate: FC<IProps> = ({
 
     createCard(repairCard)
   }
+
+  //
+  console.log(slug)
 
   return (
     <>

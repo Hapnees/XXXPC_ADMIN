@@ -52,6 +52,14 @@ const userApi = apiWithTags.injectEndpoints({
       }),
       invalidatesTags: [{ type: 'Users', id: 'LIST' }],
     }),
+
+    updateOnline: build.mutation<{ message: string }, { isOnline: boolean }>({
+      query: ({ isOnline }) => ({
+        url: 'user/online',
+        method: 'POST',
+        body: { isOnline },
+      }),
+    }),
   }),
 })
 
@@ -60,4 +68,5 @@ export const {
   useDeleteUsersMutation,
   useCreateUserMutation,
   useUpdateUserMutation,
+  useUpdateOnlineMutation,
 } = userApi

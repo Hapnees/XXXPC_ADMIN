@@ -1,27 +1,39 @@
 import { useEffect } from 'react'
 import { useRefreshTokensMutation } from '../api/auth.api'
 import { useActions, useAuth } from '@hooks/index'
+import { useUpdateOnlineMutation } from '@api/user.api'
 
 export const useRefreshTokens = () => {
   const { setAuth, authSetIsNeeded } = useActions()
   const [refreshTokens] = useRefreshTokensMutation()
+  const [updateOnline] = useUpdateOnlineMutation()
   const isAuth = useAuth()
+
+  const handler = (event: BeforeUnloadEvent) => {
+    event.preventDefault()
+    updateOnline({ isOnline: false })
+    return ''
+  }
 
   // Обновляем токены при входе на сайт
   useEffect(() => {
     if (!isAuth) return
+    updateOnline({ isOnline: true })
 
     authSetIsNeeded(true)
     refreshTokens()
       .unwrap()
-      .then(response =>
+      .then(response => {
+        window.addEventListener('beforeunload', handler)
         setAuth({
           accessToken: response.tokens.accessToken,
           refreshToken: response.tokens.refreshToken,
           user: { role: response.role },
         })
-      )
-  }, [])
+      })
+
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [updateOnline])
 
   // Обновляем токены каждые 14 минут
   useEffect(() => {
@@ -32,7 +44,6 @@ export const useRefreshTokens = () => {
       refreshTokens()
         .unwrap()
         .then(response => {
-          console.log('REFRESH TOKENS')
           setAuth({
             accessToken: response.tokens.accessToken,
             refreshToken: response.tokens.refreshToken,

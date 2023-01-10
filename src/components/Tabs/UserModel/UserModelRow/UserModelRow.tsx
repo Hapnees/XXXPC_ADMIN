@@ -25,7 +25,8 @@ const UserModelRow: FC<IProps> = ({
 }) => {
   const value = checkList.includes(user.id)
 
-  const onChangeCheck = () => {
+  const onChangeCheck = (event: any) => {
+    event.stopPropagation()
     if (value) {
       const newCheckList = [...checkList].filter(el => el !== user.id)
       setCheckList(newCheckList)
@@ -42,12 +43,15 @@ const UserModelRow: FC<IProps> = ({
           backgroundColor: value ? 'rgba(177, 39, 39, 0.505)' : '',
         }}
       >
-        <li onClick={onChangeCheck} className={mainCl.short__element}>
+        <li
+          onClick={event => onChangeCheck(event)}
+          className={mainCl.short__element}
+        >
           <input
             type='checkbox'
             className={mainCl.checkbox}
             checked={value}
-            onChange={onChangeCheck}
+            onChange={event => onChangeCheck(event)}
           />
         </li>
         <li className={mainCl.short__element}>{user.id}</li>
