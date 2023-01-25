@@ -1,17 +1,20 @@
-import React, { FC, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import { Chat } from '@interfaces/chat.interface'
 import { IFieldMenuElement } from '@interfaces/fieldMenuElement.interface'
 import mainCl from '../../tabs.module.scss'
 import { ChatStatus, ChatStatusView, sortTitles } from '../ChatModel.interface'
 import { dateFormat } from '@utils/date.format'
-import { useAcceptChatRequestMutation } from '@api/chat.api'
 import customToast from '@utils/customToast'
+import { Socket } from 'socket.io-client'
+import { useAppSelector } from '@hooks/useAppSelector'
 
 interface IProps {
 	chat: Chat
 	setCheckList: React.Dispatch<React.SetStateAction<number[]>>
 	checkList: number[]
 	checkFieldsList: IFieldMenuElement[]
+	socket?: Socket
+	getChats: () => void
 }
 
 const ChatModelRow: FC<IProps> = ({
@@ -19,9 +22,13 @@ const ChatModelRow: FC<IProps> = ({
 	checkFieldsList,
 	checkList,
 	setCheckList,
+	socket,
+	getChats,
 }) => {
-	const [acceptChatRequest] = useAcceptChatRequestMutation()
 	const value = checkList.includes(chat.id)
+	const {
+		user: { id },
+	} = useAppSelector(state => state.auth)
 
 	const onChangeCheck = (event: any) => {
 		event.stopPropagation()
@@ -38,9 +45,9 @@ const ChatModelRow: FC<IProps> = ({
 
 		if (chat.status === ChatStatus.ACCEPTED) return
 
-		acceptChatRequest({ chatId: chat.id })
-			.unwrap()
-			.then(response => customToast.success(response.message))
+		socket?.emit('accept', { masterId: id, chatId: chat.id })
+		socket?.off('accept')
+		getChats()
 	}
 
 	return (

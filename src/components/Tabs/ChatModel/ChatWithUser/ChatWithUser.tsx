@@ -1,43 +1,99 @@
-import React, { FC, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import cl from './ChatWithUser.module.scss'
 import { IoSend } from 'react-icons/io5'
-import { useGetUserChatQuery, useSendChatMessageMutation } from '@api/chat.api'
+import { useGetUserChatQuery } from '@api/chat.api'
 import { Roles } from '@interfaces/roles.interface'
+import { io, Socket } from 'socket.io-client'
+import { useAppSelector } from '@hooks/useAppSelector'
 
 interface IProps {
-	chat: {
-		username: string
-	}
+	userIdFromAdmin?: number
+	setUserIdFromAdmin: React.Dispatch<React.SetStateAction<number | undefined>>
 }
 
-const ChatWithUser = () => {
-	const { data: userChatData } = useGetUserChatQuery()
-	const [sendMessage] = useSendChatMessageMutation()
+interface Message {
+	text: string
+	role: Roles
+	userId: number
+	chatId: number
+}
+
+const ChatWithUser: FC<IProps> = ({ userIdFromAdmin, setUserIdFromAdmin }) => {
+	const { data: userChatData } = useGetUserChatQuery(
+		{ userIdFromAdmin: userIdFromAdmin || 0 },
+		{ skip: !userIdFromAdmin }
+	)
+	const {
+		user: { role, id },
+	} = useAppSelector(state => state.auth)
 
 	const [message, setMessage] = useState('')
+	const [socket, setSocket] = useState<Socket>()
+
+	const [listMessages, setListMessages] = useState<Message[]>([])
+
+	const sendMessage = () => {
+		if (!userChatData) return
+
+		socket?.emit('message', {
+			text: message,
+			role,
+			chatId: userChatData.id,
+			userId: id,
+		})
+		setMessage('')
+	}
+
+	const messageListenter = (message: Message) => {
+		setListMessages([...listMessages, message])
+	}
+
+	useEffect(() => {
+		if (!(userChatData && id)) return
+
+		setListMessages(
+			userChatData.Message.map(el => ({
+				text: el.text,
+				role: el.user.role,
+				chatId: el.id,
+				userId: id,
+			}))
+		)
+	}, [userChatData])
+
+	useEffect(() => {
+		const newSocket = io('http://localhost:8001')
+		setSocket(newSocket)
+	}, [setSocket])
+
+	useEffect(() => {
+		socket?.on('message', messageListenter)
+
+		return () => {
+			socket?.off('message')
+		}
+	}, [messageListenter])
 
 	return (
-		<div>
+		<div className='mt-[20px] flex flex-col'>
 			<div className={cl.container}>
 				<div className={cl.header}>Пользователь Никита</div>
 				<div className='grow'>
-					<ul className='flex flex-col'>
-						{userChatData?.Message.map(message => (
+					<ul className={cl.message__list}>
+						{listMessages.map((el, idx) => (
 							<li
-								key={message.id}
+								key={idx}
 								className={
-									message.user.role === Roles.USER
+									el.role === Roles.USER
 										? cl.user__message
-										: message.user.role === Roles.ADMIN
+										: el.role === Roles.ADMIN
 										? cl.master__message
 										: ''
 								}
 							>
-								{message.text}
+								{el.text}
 							</li>
 						))}
-						{/* <li className={cl.user__message}>Здравствуйте!</li>
-						<li className={cl.master__message}>Здравствуйте!</li> */}
 					</ul>
 				</div>
 				<div className={cl.input__message}>
@@ -47,16 +103,15 @@ const ChatWithUser = () => {
 						value={message}
 						onChange={event => setMessage(event.target.value)}
 					/>
-					<IoSend
-						className={cl.icon__send}
-						onClick={() => {
-							if (!userChatData) return
-
-							sendMessage({ message, chatId: userChatData.id })
-						}}
-					/>
+					<IoSend className={cl.icon__send} onClick={sendMessage} />
 				</div>
 			</div>
+			<button
+				className={cl.button}
+				onClick={() => setUserIdFromAdmin(undefined)}
+			>
+				Назад
+			</button>
 		</div>
 	)
 }

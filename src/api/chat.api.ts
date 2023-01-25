@@ -1,4 +1,4 @@
-import { Chat } from '@interfaces/chat.interface'
+import { Chat, userChat } from '@interfaces/chat.interface'
 import { baseApi } from './baseApi'
 
 const baseApiWithTags = baseApi.enhanceEndpoints({ addTagTypes: ['Chat'] })
@@ -12,35 +12,27 @@ export const chatApi = baseApiWithTags.injectEndpoints({
 			providesTags: [{ type: 'Chat', id: 'LIST' }],
 		}),
 
-		getUserChat: build.query<Chat, void>({
-			query: () => ({
+		getUserChat: build.query<userChat, { userIdFromAdmin: number }>({
+			query: ({ userIdFromAdmin }) => ({
 				url: 'chat/get',
+				params: { userIdFromAdmin },
 			}),
 			providesTags: [{ type: 'Chat', id: 'USER_CHAT' }],
 		}),
 
-		acceptChatRequest: build.mutation<{ message: string }, { chatId: number }>({
-			query: body => ({
-				url: 'chat/accept',
-				method: 'PATCH',
-				body,
-			}),
-			invalidatesTags: [{ type: 'Chat', id: 'LIST' }],
-		}),
-		sendChatMessage: build.mutation<void, { message: string; chatId: number }>({
-			query: body => ({
-				url: 'chat/send/message',
-				method: 'POST',
-				body,
-			}),
-			invalidatesTags: [{ type: 'Chat', id: 'USER_CHAT' }],
-		}),
+		// acceptChatRequest: build.mutation<{ message: string }, { chatId: number }>({
+		// 	query: body => ({
+		// 		url: 'chat/accept',
+		// 		method: 'PATCH',
+		// 		body,
+		// 	}),
+		// 	invalidatesTags: [{ type: 'Chat', id: 'LIST' }],
+		// }),
 	}),
 })
 
 export const {
 	useLazyGetChatsQuery,
-	useAcceptChatRequestMutation,
-	useSendChatMessageMutation,
+	// useAcceptChatRequestMutation,
 	useGetUserChatQuery,
 } = chatApi

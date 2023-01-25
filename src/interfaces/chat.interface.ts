@@ -1,7 +1,7 @@
 import { ChatStatus } from '@components/Tabs/ChatModel/ChatModel.interface'
 import { Roles } from './roles.interface'
 
-export interface Chat {
+export type userChat = {
 	id: number
 	userId: number
 	issue: string
@@ -13,6 +13,16 @@ export interface Chat {
 		createdAt: string
 		user: { role: Roles }
 	}[]
+	status: ChatStatus
+	updatedAt: string
+	createdAt: string
+}
+
+export interface Chat {
+	id: number
+	issue: string
+	masterName: string
+	user: { id: number; username: string }[]
 	status: ChatStatus
 	updatedAt: string
 	createdAt: string

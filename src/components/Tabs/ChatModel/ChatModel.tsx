@@ -9,11 +9,12 @@ import ChatModelRow from './ChatModelRow/ChatModelRow'
 import AdminFieldsPopup from '@components/AdminFieldsPopup/AdminFieldsPopup'
 import { AdminLoader } from '@components/UI'
 import ChatWithUser from './ChatWithUser/ChatWithUser'
+import { io, Socket } from 'socket.io-client'
 
 const ChatModel = () => {
 	const [isFirst, setIsFirst] = useState(true)
 
-	const [isViewChat, setIsViewChat] = useState(true)
+	const [userIdFromAdmin, setUserIdFromAdmin] = useState<number>()
 
 	const { isNeededRefresh } = useAppSelector(state => state.auth)
 	const [getChats, { data: chatData, isLoading }] = useLazyGetChatsQuery()
@@ -32,6 +33,12 @@ const ChatModel = () => {
 			}))
 	)
 
+	const [socket, setSocket] = useState<Socket>()
+
+	const onClickChatRow = (userId: number) => {
+		setUserIdFromAdmin(userId)
+	}
+
 	useEffect(() => {
 		if (isNeededRefresh) return
 
@@ -40,12 +47,20 @@ const ChatModel = () => {
 			.then(() => setIsFirst(false))
 	}, [isNeededRefresh])
 
+	useEffect(() => {
+		const newSocket = io('http://localhost:8001')
+		setSocket(newSocket)
+	}, [setSocket])
+
 	if (isLoading || isFirst) return <AdminLoader />
 
 	return (
 		<>
-			{isViewChat ? (
-				<ChatWithUser />
+			{userIdFromAdmin ? (
+				<ChatWithUser
+					userIdFromAdmin={userIdFromAdmin}
+					setUserIdFromAdmin={setUserIdFromAdmin}
+				/>
 			) : (
 				<div className={mainCl.wrapper}>
 					<div className={mainCl.panel}>
@@ -72,12 +87,17 @@ const ChatModel = () => {
 						</ul>
 						<ul>
 							{chatData?.map(chat => (
-								<li key={chat.id}>
+								<li
+									key={chat.id}
+									onClick={() => onClickChatRow(chat.user[0].id)}
+								>
 									<ChatModelRow
+										getChats={getChats}
 										chat={chat}
 										checkList={checkList}
 										checkFieldsList={checkFields}
 										setCheckList={setCheckList}
+										socket={socket}
 									/>
 								</li>
 							))}

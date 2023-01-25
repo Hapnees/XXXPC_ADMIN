@@ -1,9 +1,10 @@
 .container {
 	@apply flex flex-col;
-	width: 400px;
+	width: 480px;
 	height: 600px;
 	border: 1px solid #38435f;
 	border-radius: 6px;
+	margin-bottom: 15px;
 }
 
 .header {
@@ -14,6 +15,11 @@
 	border-bottom: 1px solid #38435f;
 	background-color: #232a3a;
 	margin-bottom: 20px;
+}
+
+.message__list {
+	@apply flex flex-col;
+	font-size: 18px;
 }
 
 .user__message {
@@ -41,7 +47,7 @@
 	border-radius: 6px;
 	resize: none;
 	height: 40px;
-	width: 86%;
+	width: 89%;
 	transition: background-color 0.3s;
 
 	&:focus,
@@ -62,4 +68,13 @@
 	&:hover {
 		background-color: #303a51;
 	}
+}
+
+.button {
+	@apply self-end px-3 py-1;
+	width: 140px;
+	cursor: pointer;
+	border-radius: 6px;
+	background-color: #434e62;
+	transition: background-color 0.3s;
 }
