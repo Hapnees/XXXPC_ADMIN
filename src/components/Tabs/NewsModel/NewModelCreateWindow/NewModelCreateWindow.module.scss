@@ -1,0 +1,72 @@
+.container {
+	@apply flex gap-12 items-center;
+}
+
+.menu {
+	@apply flex flex-col gap-4 my-6;
+	> li {
+		@apply flex flex-col gap-2;
+	}
+}
+
+.textarea {
+	@apply px-2 py-1;
+	background-color: #0e1118;
+	resize: none;
+	background-color: #1a202c;
+	transition: background-color 0.3s;
+
+	&:hover,
+	&:focus {
+		background-color: #0e1118;
+		box-shadow: 0 0 5px #000;
+	}
+
+	&::placeholder {
+		color: #3c525a;
+	}
+}
+
+.preview__container {
+	@apply px-8 py-2 mt-4;
+	border: 1px solid #283142;
+	border-radius: 6px;
+}
+
+.clamp {
+	word-wrap: break-word;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.title {
+	@extend .clamp;
+
+	width: 677px;
+	font-size: 65px;
+	letter-spacing: 2.6px;
+	margin-bottom: 25px;
+}
+
+.body {
+	@extend .clamp;
+
+	-webkit-line-clamp: 3;
+	width: 548px;
+	font-size: 20px;
+}
+
+.button {
+	@apply py-1 w-full;
+	border-radius: 6px;
+	background-color: #495467;
+	transition: background-color 0.3s;
+
+	&:hover {
+		background-color: #2b323d;
+	}
+}

@@ -12,38 +12,44 @@ import { Roles } from '@interfaces/roles.interface'
 import { useNavigate } from 'react-router-dom'
 import customToast from '@utils/customToast'
 import { AdminLoader } from '@components/UI'
+import NewsModel from '@components/Tabs/NewsModel/NewsModel'
+import ChatModel from '@components/Tabs/ChatModel/ChatModel'
 
 const HomePage = () => {
-  const { currentTab } = useAppSelector(state => state.tab)
+	const { currentTab } = useAppSelector(state => state.tab)
 
-  const isAuth = useAuth(Roles.ADMIN)
-  const navigate = useNavigate()
+	const isAuth = useAuth(Roles.ADMIN)
+	const navigate = useNavigate()
 
-  useEffect(() => {
-    if (!isAuth) {
-      customToast.error('Вы не являетесь администратором')
-      setTimeout(() => navigate('/auth'), 1500)
-    }
-  }, [isAuth])
+	useEffect(() => {
+		if (!isAuth) {
+			customToast.error('Вы не являетесь администратором')
+			setTimeout(() => navigate('/auth'), 1500)
+		}
+	}, [isAuth])
 
-  const viewTab = useMemo(() => {
-    switch (currentTab) {
-      case Tabs.MODELS:
-        return <OpenModelForm />
-      case Tabs.USER:
-        return <UserModel />
-      case Tabs.REPAIRCARD:
-        return <RepairCardModel />
-      case Tabs.SERVICE:
-        return <ServiceModel />
-      case Tabs.ORDER:
-        return <OrderModel />
-    }
-  }, [currentTab])
+	const viewTab = useMemo(() => {
+		switch (currentTab) {
+			case Tabs.MODELS:
+				return <OpenModelForm />
+			case Tabs.USER:
+				return <UserModel />
+			case Tabs.REPAIRCARD:
+				return <RepairCardModel />
+			case Tabs.SERVICE:
+				return <ServiceModel />
+			case Tabs.ORDER:
+				return <OrderModel />
+			case Tabs.NEWS:
+				return <NewsModel />
+			case Tabs.CHAT:
+				return <ChatModel />
+		}
+	}, [currentTab])
 
-  if (!isAuth) return <AdminLoader />
+	if (!isAuth) return <AdminLoader />
 
-  return <ModelLayout>{viewTab}</ModelLayout>
+	return <ModelLayout>{viewTab}</ModelLayout>
 }
 
 export default HomePage

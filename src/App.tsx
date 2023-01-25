@@ -5,14 +5,14 @@ import AuthPage from './pages/AuthPage/AuthPage'
 import HomePage from './pages/HomePage'
 
 function App() {
-  return (
-    <Routes>
-      <Route path='/' element={<MainLayout />}>
-        <Route path='' element={<HomePage />} />
-        <Route path='auth' element={<AuthPage />} />
-      </Route>
-    </Routes>
-  )
+	return (
+		<Routes>
+			<Route path='/' element={<MainLayout />}>
+				<Route path='' element={<HomePage />} />
+				<Route path='auth' element={<AuthPage />} />
+			</Route>
+		</Routes>
+	)
 }
 
 export default App

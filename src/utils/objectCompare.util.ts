@@ -1,20 +1,32 @@
-export const objectCompare = <T extends { id: number }>(
-  objOld: T,
-  objNew: T
+export const objectCompare = <T extends object, P extends T>(
+	objOld: T,
+	objNew: P
 ) => {
-  const changes = {} as T
-  const { id: idOld, ...currentObjOld } = objOld
-  const { id: idNew, ...currentObjNew } = objNew
+	const keysOld = Object.keys(objOld)
+	const keysNew = Object.keys(objNew)
 
-  let key: keyof typeof currentObjOld
-  for (key in currentObjOld) {
-    if (currentObjOld[key] !== currentObjNew[key]) {
-      changes[key] = currentObjNew[key]
-    }
-  }
+	const result = []
+	for (let i = 0; i < keysOld.length; i++) {
+		const currentKey = keysOld[i] as keyof typeof objOld
+		if (keysNew.includes(currentKey as string)) {
+			if (Array.isArray(objOld[currentKey])) {
+				if (
+					JSON.stringify(objOld[currentKey]) !==
+					JSON.stringify(objNew[currentKey])
+				) {
+					// console.log(objOld[currentKey])
+					// console.log(objNew[currentKey])
 
-  return {
-    id: idOld,
-    changes,
-  }
+					result.push(currentKey)
+				}
+			} else if (objOld[currentKey] !== objNew[currentKey]) {
+				// console.log(objOld[currentKey])
+				// console.log(objNew[currentKey])
+
+				result.push(currentKey)
+			}
+		}
+	}
+
+	return !!result.length
 }

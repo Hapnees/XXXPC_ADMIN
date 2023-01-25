@@ -4,54 +4,56 @@ import { useActions, useAuth } from '@hooks/index'
 import { useUpdateOnlineMutation } from '@api/user.api'
 
 export const useRefreshTokens = () => {
-  const { setAuth, authSetIsNeeded } = useActions()
-  const [refreshTokens] = useRefreshTokensMutation()
-  const [updateOnline] = useUpdateOnlineMutation()
-  const isAuth = useAuth()
+	const { setAuth, authSetIsNeeded } = useActions()
+	const [refreshTokens] = useRefreshTokensMutation()
+	const [updateOnline] = useUpdateOnlineMutation()
+	const isAuth = useAuth()
 
-  const handler = (event: BeforeUnloadEvent) => {
-    event.preventDefault()
-    updateOnline({ isOnline: false })
-    return ''
-  }
+	const handler = (event: BeforeUnloadEvent) => {
+		event.preventDefault()
+		// authSetIsNeeded(true)
+		updateOnline({ isOnline: false })
+		return ''
+	}
 
-  // Обновляем токены при входе на сайт
-  useEffect(() => {
-    if (!isAuth) return
-    updateOnline({ isOnline: true })
+	// Обновляем токены при входе на сайт
+	useEffect(() => {
+		if (!isAuth) return
 
-    authSetIsNeeded(true)
-    refreshTokens()
-      .unwrap()
-      .then(response => {
-        window.addEventListener('beforeunload', handler)
-        setAuth({
-          accessToken: response.tokens.accessToken,
-          refreshToken: response.tokens.refreshToken,
-          user: { role: response.role },
-        })
-      })
+		// authSetIsNeeded(true)
+		refreshTokens()
+			.unwrap()
+			.then(response => {
+				window.addEventListener('beforeunload', handler)
 
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [updateOnline])
+				setAuth({
+					accessToken: response.tokens.accessToken,
+					refreshToken: response.tokens.refreshToken,
+					user: { role: response.role },
+				})
+				updateOnline({ isOnline: true })
+			})
 
-  // Обновляем токены каждые 14 минут
-  useEffect(() => {
-    if (!isAuth) return
+		return () => window.removeEventListener('beforeunload', handler)
+	}, [])
 
-    const interval = setInterval(() => {
-      authSetIsNeeded(true)
-      refreshTokens()
-        .unwrap()
-        .then(response => {
-          setAuth({
-            accessToken: response.tokens.accessToken,
-            refreshToken: response.tokens.refreshToken,
-            user: { role: response.role },
-          })
-        })
-    }, 60_000 * 15)
+	// Обновляем токены каждые 14 минут
+	useEffect(() => {
+		if (!isAuth) return
 
-    return () => clearInterval(interval)
-  }, [isAuth])
+		const interval = setInterval(() => {
+			authSetIsNeeded(true)
+			refreshTokens()
+				.unwrap()
+				.then(response => {
+					setAuth({
+						accessToken: response.tokens.accessToken,
+						refreshToken: response.tokens.refreshToken,
+						user: { role: response.role },
+					})
+				})
+		}, 60_000 * 15)
+
+		return () => clearInterval(interval)
+	}, [isAuth])
 }

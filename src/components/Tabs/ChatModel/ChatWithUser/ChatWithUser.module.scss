@@ -1,0 +1,65 @@
+.container {
+	@apply flex flex-col;
+	width: 400px;
+	height: 600px;
+	border: 1px solid #38435f;
+	border-radius: 6px;
+}
+
+.header {
+	padding: 10px 0;
+	text-align: center;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	border-bottom: 1px solid #38435f;
+	background-color: #232a3a;
+	margin-bottom: 20px;
+}
+
+.user__message {
+	@apply self-start px-4 py-1 ml-2 mt-2;
+	background-color: #3a4560;
+	border-radius: 6px;
+}
+
+.master__message {
+	@apply self-end px-4 py-1 mr-2 mt-2;
+	background-color: #252c3d;
+	border: 1px solid #2d3447;
+	border-radius: 6px;
+}
+
+.input__message {
+	@apply flex items-center justify-between;
+	padding: 8px;
+	border-top: 1px solid #333d55;
+}
+
+.input {
+	@apply p-2;
+	background-color: #1b202b;
+	border-radius: 6px;
+	resize: none;
+	height: 40px;
+	width: 86%;
+	transition: background-color 0.3s;
+
+	&:focus,
+	&:hover {
+		background-color: #232a3a;
+	}
+}
+
+.icon__send {
+	@apply mr-1 p-2;
+	height: 40px;
+	width: 40px;
+	background-color: #232a3a;
+	border-radius: 100%;
+	cursor: pointer;
+	transition: background-color 0.3s;
+
+	&:hover {
+		background-color: #303a51;
+	}
+}

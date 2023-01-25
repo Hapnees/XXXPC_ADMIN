@@ -15,12 +15,12 @@ const persistor = persistStore(store)
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
-  <BrowserRouter>
-    <ToastContainer {...toastContainerConfig} />
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <App />
-      </PersistGate>
-    </Provider>
-  </BrowserRouter>
+	<BrowserRouter>
+		<ToastContainer {...toastContainerConfig} />
+		<Provider store={store}>
+			<PersistGate loading={null} persistor={persistor}>
+				<App />
+			</PersistGate>
+		</Provider>
+	</BrowserRouter>
 )

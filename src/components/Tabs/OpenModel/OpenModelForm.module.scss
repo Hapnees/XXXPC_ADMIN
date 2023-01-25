@@ -15,7 +15,6 @@
 	border-bottom: 1px solid #1a202c;
 }
 
-
 .container__menu {
 	@apply px-3 py-4;
 }
@@ -25,26 +24,28 @@
 	grid-template-columns: repeat(2, 180px);
 	grid-gap: 8px;
 
-	>li {
-		@apply flex flex-col items-center gap-2 py-2 px-2;
+	> li {
+		@apply flex justify-center items-center gap-2 py-2 px-2;
 		cursor: pointer;
 		background-color: #1a202c;
 		box-shadow: 0 0 5px #000;
 		border-radius: 6px;
-		transition: background-color .3s;
+		transition: background-color 0.3s;
 
 		&:hover {
 			background-color: #10131b;
 		}
 
-		&:hover>p,
-		&:hover>.icon {
+		&:hover > p,
+		&:hover > .icon {
 			color: #79849f;
 		}
-
-		>p {
-			transition: color .3s;
-			color: #c1c8db;
+		> div {
+			@apply flex flex-col items-center gap-2;
+			> p {
+				transition: color 0.3s;
+				color: #c1c8db;
+			}
 		}
 	}
 }
@@ -53,5 +54,27 @@
 	height: 50px;
 	width: 50px;
 	color: #b9c0d2;
-	transition: color .3s;
+	transition: color 0.3s;
+}
+
+.icon__chat__container {
+	position: relative;
+}
+
+.icon__chat {
+	height: 50px;
+	width: 50px;
+	color: #b9c0d2;
+	transition: color 0.3s;
+}
+
+.chat__counter {
+	@apply absolute flex items-center justify-center right-[-50px] top-0;
+	font-size: 18px;
+	// text-align: center;
+	padding: 14px;
+	height: 40px;
+	width: 40px;
+	background-color: #282f3f;
+	border-radius: 100%;
 }
