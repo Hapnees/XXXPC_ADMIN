@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useActions, useAppSelector } from '@hooks/index'
 import { Tabs } from '@interfaces/tabs.interface'
 import cl from './OpenModelForm.module.scss'
@@ -6,9 +6,20 @@ import { FaUser } from 'react-icons/fa'
 import { BsFillGearFill, BsChatSquareDotsFill } from 'react-icons/bs'
 import { RiPencilFill, RiSdCardFill } from 'react-icons/ri'
 import { BiNews } from 'react-icons/bi'
+import { io, Socket } from 'socket.io-client'
+import { useLazyGetChatRequstsCountQuery } from '@api/chat.api'
+import customToast from '@utils/customToast'
 
 const OpenModelForm = () => {
+	const [getChatRequestsCount, { data: chatReqeustsCount }] =
+		useLazyGetChatRequstsCountQuery()
+
+	const [socket, setSocket] = useState<Socket>()
 	const { setCurrentTab, addTab } = useActions()
+	const {
+		isNeededRefresh,
+		user: { role, id },
+	} = useAppSelector(state => state.auth)
 	const { tabs } = useAppSelector(state => state.tab)
 
 	const styleBG = (tab: Tabs) => ({
@@ -27,6 +38,37 @@ const OpenModelForm = () => {
 		addTab(newTab)
 		setCurrentTab(newTab)
 	}
+
+	const chatReqeustListener = (data: { isSendedRequest: boolean }) => {
+		console.log(data)
+		if (!data.isSendedRequest) return
+
+		getChatRequestsCount()
+			.unwrap()
+			.then(() => {
+				customToast.info('Новый запрос на чат')
+			})
+	}
+
+	useEffect(() => {
+		if (isNeededRefresh) return
+
+		getChatRequestsCount()
+	}, [isNeededRefresh])
+
+	useEffect(() => {
+		const newSocket = io('http://localhost:8001')
+		setSocket(newSocket)
+	}, [setSocket])
+
+	useEffect(() => {
+		socket?.on('chat-request', chatReqeustListener)
+
+		//TODO: REWORK!
+		return () => {
+			socket?.off('chat-request')
+		}
+	}, [chatReqeustListener])
 
 	return (
 		<div className={cl.wrapper}>
@@ -103,7 +145,7 @@ const OpenModelForm = () => {
 										className={cl.icon__chat}
 										style={styleColor(Tabs.CHAT)}
 									/>
-									<p className={cl.chat__counter}>16</p>
+									<p className={cl.chat__counter}>{chatReqeustsCount}</p>
 								</div>
 								<p style={styleColor(Tabs.CHAT)}>Чаты</p>
 							</div>

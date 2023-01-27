@@ -20,19 +20,16 @@ export const chatApi = baseApiWithTags.injectEndpoints({
 			providesTags: [{ type: 'Chat', id: 'USER_CHAT' }],
 		}),
 
-		// acceptChatRequest: build.mutation<{ message: string }, { chatId: number }>({
-		// 	query: body => ({
-		// 		url: 'chat/accept',
-		// 		method: 'PATCH',
-		// 		body,
-		// 	}),
-		// 	invalidatesTags: [{ type: 'Chat', id: 'LIST' }],
-		// }),
+		getChatRequstsCount: build.query<number, void>({
+			query: () => ({
+				url: 'chat/get/chat-requests-count',
+			}),
+		}),
 	}),
 })
 
 export const {
 	useLazyGetChatsQuery,
-	// useAcceptChatRequestMutation,
-	useGetUserChatQuery,
+	useLazyGetChatRequstsCountQuery,
+	useLazyGetUserChatQuery,
 } = chatApi

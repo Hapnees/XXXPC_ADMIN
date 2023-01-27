@@ -10,10 +10,8 @@ export const useRefreshTokens = () => {
 	const isAuth = useAuth()
 
 	const handler = (event: BeforeUnloadEvent) => {
-		event.preventDefault()
 		// authSetIsNeeded(true)
 		updateOnline({ isOnline: false })
-		return ''
 	}
 
 	// Обновляем токены при входе на сайт

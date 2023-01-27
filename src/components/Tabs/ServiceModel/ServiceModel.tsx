@@ -36,6 +36,8 @@ interface IProps {
 }
 
 const ServiceModel: FC<IProps> = ({ repairCardId, toBack }) => {
+	const [isWaiting, setIsWaiting] = useState(true)
+
 	const { isNeededRefresh } = useAppSelector(state => state.auth)
 	const searchRef = useRef<HTMLInputElement>(null)
 
@@ -109,10 +111,15 @@ const ServiceModel: FC<IProps> = ({ repairCardId, toBack }) => {
 		)
 			return
 
+		setIsWaiting(true)
 		getServicesWithParams()
+			.unwrap()
+			.then(() => {
+				setIsWaiting(false)
+			})
 	}, [currentPage, sortDirect, isNeededRefresh])
 
-	if (isLoading || isNeededRefresh) return <AdminLoader />
+	if (isLoading || isNeededRefresh || isWaiting) return <AdminLoader />
 
 	return (
 		<div className={mainCl.wrapper}>

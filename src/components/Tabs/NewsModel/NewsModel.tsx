@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AdminFieldsPopup from '@components/AdminFieldsPopup/AdminFieldsPopup'
 import SearchInputWithButton from '@components/SearchInputWithButton/SearchInputWithButton'
 import { CreateButton, DeleteButton } from '@components/UI/Buttons'
@@ -11,13 +11,17 @@ import {
 	sortTitles,
 	sortTitlesView,
 } from './NewModelCreateWindow/NewsModel.interface'
-import { useGetNewsQuery } from '@api/news.api'
+import { useLazyGetNewsQuery } from '@api/news.api'
 import NewsModelRow from './NewModelCreateWindow/NewsModelRow/NewsModelRow'
 import { INewsUpdate } from '@interfaces/news/news-update.interface'
+import { AdminLoader } from '@components/UI'
+import { useAppSelector } from '@hooks/useAppSelector'
 
 const NewsModel = () => {
+	const [isWaiting, setIsWaiting] = useState(true)
+	const { isNeededRefresh } = useAppSelector(state => state.auth)
 	const [isOpen, setIsOpen] = useState(false)
-	const { data: newsData } = useGetNewsQuery()
+	const [getNews, { data: newsData, isLoading }] = useLazyGetNewsQuery()
 
 	const [currentNews, setCurrentNews] = useState<INewsUpdate | undefined>()
 
@@ -44,6 +48,19 @@ const NewsModel = () => {
 		setCurrentNews(undefined)
 		setIsOpen(true)
 	}
+
+	useEffect(() => {
+		if (isNeededRefresh) return
+
+		setIsWaiting(true)
+		getNews()
+			.unwrap()
+			.then(() => {
+				setIsWaiting(false)
+			})
+	}, [isNeededRefresh])
+
+	if (isLoading || isWaiting) return <AdminLoader />
 
 	return (
 		<div className={mainCl.wrapper}>

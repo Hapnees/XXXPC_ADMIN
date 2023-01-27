@@ -14,7 +14,7 @@ interface IProps {
 	checkList: number[]
 	checkFieldsList: IFieldMenuElement[]
 	socket?: Socket
-	getChats: () => void
+	getChats: () => any
 }
 
 const ChatModelRow: FC<IProps> = ({
@@ -27,7 +27,7 @@ const ChatModelRow: FC<IProps> = ({
 }) => {
 	const value = checkList.includes(chat.id)
 	const {
-		user: { id },
+		user: { id, role },
 	} = useAppSelector(state => state.auth)
 
 	const onChangeCheck = (event: any) => {
@@ -40,14 +40,23 @@ const ChatModelRow: FC<IProps> = ({
 		setCheckList(prev => [...prev, chat.id])
 	}
 
+	const acceptListener = (data: { isAccepted: boolean }) => {
+		if (!data.isAccepted) return
+
+		getChats()
+			.unwrap()
+			.then(() => {
+				socket?.off('chat-accept')
+			})
+	}
+
 	const onClickStatus = (event: any) => {
 		event.stopPropagation()
 
 		if (chat.status === ChatStatus.ACCEPTED) return
 
-		socket?.emit('accept', { masterId: id, chatId: chat.id })
-		socket?.off('accept')
-		getChats()
+		socket?.on('chat-accept', acceptListener)
+		socket?.emit('chat-accept', { masterId: id, chatId: chat.id, role })
 	}
 
 	return (

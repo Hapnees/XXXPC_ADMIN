@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { CreateButton, DeleteButton } from '@components/UI/Buttons'
 import { IFieldMenuElement } from '@interfaces/fieldMenuElement.interface'
 import mainCl from '../tabs.module.scss'
-import { sortTitles, sortTitlesView } from './ChatModel.interface'
+import { ChatStatus, sortTitles, sortTitlesView } from './ChatModel.interface'
 import { useLazyGetChatsQuery } from '@api/chat.api'
 import { useAppSelector } from '@hooks/useAppSelector'
 import ChatModelRow from './ChatModelRow/ChatModelRow'
@@ -10,6 +10,7 @@ import AdminFieldsPopup from '@components/AdminFieldsPopup/AdminFieldsPopup'
 import { AdminLoader } from '@components/UI'
 import ChatWithUser from './ChatWithUser/ChatWithUser'
 import { io, Socket } from 'socket.io-client'
+import customToast from '@utils/customToast'
 
 const ChatModel = () => {
 	const [isFirst, setIsFirst] = useState(true)
@@ -36,7 +37,21 @@ const ChatModel = () => {
 	const [socket, setSocket] = useState<Socket>()
 
 	const onClickChatRow = (userId: number) => {
+		const checkStatus = chatData?.filter(el =>
+			el.user.find(el2 => el2.id === userId)
+		)[0].status
+
+		if (checkStatus === ChatStatus.PENDING) {
+			customToast.error('Сначала примите запрос')
+			return
+		}
 		setUserIdFromAdmin(userId)
+	}
+
+	const chatRequestListener = (data: { isSendedRequest: boolean }) => {
+		if (!data.isSendedRequest) return
+
+		getChats()
 	}
 
 	useEffect(() => {
@@ -46,6 +61,10 @@ const ChatModel = () => {
 			.unwrap()
 			.then(() => setIsFirst(false))
 	}, [isNeededRefresh])
+
+	useEffect(() => {
+		socket?.on('chat-request', chatRequestListener)
+	}, [chatRequestListener])
 
 	useEffect(() => {
 		const newSocket = io('http://localhost:8001')

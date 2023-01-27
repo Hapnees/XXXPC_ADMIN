@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react'
 import cl from './ChatWithUser.module.scss'
 import { IoSend } from 'react-icons/io5'
-import { useGetUserChatQuery } from '@api/chat.api'
+import { useLazyGetUserChatQuery } from '@api/chat.api'
 import { Roles } from '@interfaces/roles.interface'
 import { io, Socket } from 'socket.io-client'
 import { useAppSelector } from '@hooks/useAppSelector'
@@ -19,10 +19,7 @@ interface Message {
 }
 
 const ChatWithUser: FC<IProps> = ({ userIdFromAdmin, setUserIdFromAdmin }) => {
-	const { data: userChatData } = useGetUserChatQuery(
-		{ userIdFromAdmin: userIdFromAdmin || 0 },
-		{ skip: !userIdFromAdmin }
-	)
+	const [getUserChat, { data: userChatData }] = useLazyGetUserChatQuery()
 	const {
 		user: { role, id },
 	} = useAppSelector(state => state.auth)
@@ -35,7 +32,7 @@ const ChatWithUser: FC<IProps> = ({ userIdFromAdmin, setUserIdFromAdmin }) => {
 	const sendMessage = () => {
 		if (!userChatData) return
 
-		socket?.emit('message', {
+		socket?.emit(`message`, {
 			text: message,
 			role,
 			chatId: userChatData.id,
@@ -62,17 +59,30 @@ const ChatWithUser: FC<IProps> = ({ userIdFromAdmin, setUserIdFromAdmin }) => {
 	}, [userChatData])
 
 	useEffect(() => {
+		if (!userChatData) return
+		socket?.emit('join', userChatData?.id)
+	}, [userChatData])
+
+	useEffect(() => {
+		if (!userIdFromAdmin) return
+
+		getUserChat({ userIdFromAdmin })
+	}, [userIdFromAdmin])
+
+	useEffect(() => {
 		const newSocket = io('http://localhost:8001')
 		setSocket(newSocket)
 	}, [setSocket])
 
 	useEffect(() => {
-		socket?.on('message', messageListenter)
+		if (!userChatData) return
+
+		socket?.on(`message`, messageListenter)
 
 		return () => {
-			socket?.off('message')
+			socket?.off(`message`)
 		}
-	}, [messageListenter])
+	}, [messageListenter, userChatData])
 
 	return (
 		<div className='mt-[20px] flex flex-col'>

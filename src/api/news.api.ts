@@ -34,5 +34,8 @@ export const newsApi = baseApiWithTags.injectEndpoints({
 	}),
 })
 
-export const { useCreateNewsMutation, useUpdateNewsMutation, useGetNewsQuery } =
-	newsApi
+export const {
+	useCreateNewsMutation,
+	useUpdateNewsMutation,
+	useLazyGetNewsQuery,
+} = newsApi

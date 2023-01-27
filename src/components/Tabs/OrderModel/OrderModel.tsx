@@ -35,6 +35,7 @@ interface IProps {
 }
 
 const OrderModel: FC<IProps> = ({ userId, username, toBack }) => {
+	const [isWaiting, setIsWaiting] = useState(true)
 	const { isNeededRefresh } = useAppSelector(state => state.auth)
 
 	const [sortTitle, setSortTitle] = useState<sortTitles>()
@@ -117,10 +118,15 @@ const OrderModel: FC<IProps> = ({ userId, username, toBack }) => {
 		if (sortTitle !== undefined && sortDirect === undefined)
 			setSortTitle(undefined)
 
+		setIsWaiting(true)
 		getOrdersWithParams()
+			.unwrap()
+			.then(() => {
+				setIsWaiting(false)
+			})
 	}, [isNeededRefresh, currentPage, sortDirect, filterStatus])
 
-	if (isLoading || isNeededRefresh) return <AdminLoader />
+	if (isLoading || isNeededRefresh || isWaiting) return <AdminLoader />
 
 	return (
 		<div className={mainCl.wrapper}>

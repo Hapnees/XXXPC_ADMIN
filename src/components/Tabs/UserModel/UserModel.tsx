@@ -27,7 +27,7 @@ import ModalWindow from '@components/UI/ModalWindow/ModalWindow'
 import customToast from '@utils/customToast'
 
 const UserModel = () => {
-	const isFirst = useRef(true)
+	const [isWaiting, setIsWaiting] = useState(true)
 
 	const { isNeededRefresh } = useAppSelector(state => state.auth)
 	const [currentPage, setCurrentPage] = useState(1)
@@ -128,10 +128,15 @@ const UserModel = () => {
 	useEffect(() => {
 		if (isNeededRefresh) return
 
+		setIsWaiting(true)
 		getAndSetUsers()
+			.unwrap()
+			.then(() => {
+				setIsWaiting(false)
+			})
 	}, [isNeededRefresh, currentPage, sortTitle, roleFilter, onlineFilter])
 
-	if (isLoading || isNeededRefresh) return <AdminLoader />
+	if (isLoading || isNeededRefresh || isWaiting) return <AdminLoader />
 
 	return (
 		<>

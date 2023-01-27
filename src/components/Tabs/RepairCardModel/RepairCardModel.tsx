@@ -50,6 +50,8 @@ const selectData = [
 ]
 
 const RepairCardModel = () => {
+	const [isWaiting, setIsWaiting] = useState(true)
+
 	const { isNeededRefresh } = useAppSelector(state => state.auth)
 	const [isOpenPopup, setIsOpenPopup] = useState(false)
 	const [filterSlug, setFilterSlug] = useState<RepairCardSlug>()
@@ -119,7 +121,12 @@ const RepairCardModel = () => {
 	useEffect(() => {
 		if (isNeededRefresh) return
 
+		setIsWaiting(true)
 		getRepairCardsWithParams()
+			.unwrap()
+			.then(() => {
+				setIsWaiting(false)
+			})
 	}, [currentPage, filterSlug, isNeededRefresh])
 
 	const onKeyDownEnter = (event: React.KeyboardEvent) => {
@@ -144,7 +151,7 @@ const RepairCardModel = () => {
 					repairCardId={currentCard?.id || 0}
 					toBack={() => setCurrentWindow(CurrentWindowRCM.LIST)}
 				/>
-			) : isLoading || isNeededRefresh ? (
+			) : isLoading || isNeededRefresh || isWaiting ? (
 				<AdminLoader />
 			) : (
 				<div className={mainCl.wrapper}>
