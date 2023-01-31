@@ -1,4 +1,4 @@
-import { ChatStatus } from '@components/Tabs/ChatModel/ChatModel.interface'
+import { ChatStatus } from 'src/pages/ChatModel/ChatModel.interface'
 import { Roles } from './roles.interface'
 
 export type userChat = {

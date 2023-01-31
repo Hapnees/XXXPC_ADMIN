@@ -1,16 +1,17 @@
 import { useEffect } from 'react'
 import { useRefreshTokensMutation } from '../api/auth.api'
-import { useActions, useAuth } from '@hooks/index'
+import { useActions, useAppSelector, useAuth } from '@hooks/index'
 import { useUpdateOnlineMutation } from '@api/user.api'
 
 export const useRefreshTokens = () => {
-	const { setAuth, authSetIsNeeded } = useActions()
+	const { setAuth, authSetIsNeeded, setUpdatedOnline } = useActions()
 	const [refreshTokens] = useRefreshTokensMutation()
 	const [updateOnline] = useUpdateOnlineMutation()
 	const isAuth = useAuth()
+	const { isNeededRefresh } = useAppSelector(state => state.auth)
 
 	const handler = (event: BeforeUnloadEvent) => {
-		// authSetIsNeeded(true)
+		event.preventDefault()
 		updateOnline({ isOnline: false })
 	}
 
@@ -29,11 +30,20 @@ export const useRefreshTokens = () => {
 					refreshToken: response.tokens.refreshToken,
 					user: { role: response.role },
 				})
-				updateOnline({ isOnline: true })
 			})
 
 		return () => window.removeEventListener('beforeunload', handler)
 	}, [])
+
+	useEffect(() => {
+		if (isNeededRefresh) return
+
+		updateOnline({ isOnline: true })
+			.unwrap()
+			.then(() => {
+				setUpdatedOnline(true)
+			})
+	}, [isNeededRefresh])
 
 	// Обновляем токены каждые 14 минут
 	useEffect(() => {
@@ -50,7 +60,7 @@ export const useRefreshTokens = () => {
 						user: { role: response.role },
 					})
 				})
-		}, 60_000 * 15)
+		}, 60_000 * 14)
 
 		return () => clearInterval(interval)
 	}, [isAuth])

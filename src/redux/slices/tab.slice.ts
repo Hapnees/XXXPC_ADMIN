@@ -1,28 +1,33 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Tabs } from '@interfaces/tabs.interface'
+import { ITab, Tabs, TabsUrl } from '@interfaces/tabs.interface'
 
 interface IState {
-  currentTab: Tabs
-  tabs: Tabs[]
+	currentTab: ITab
+	tabs: ITab[]
 }
 
-const initialState: IState = { tabs: [], currentTab: Tabs.MODELS }
+const initialState: IState = {
+	tabs: [],
+	currentTab: { title: Tabs.MODELS, url: TabsUrl[Tabs.MODELS] },
+}
 
 export const tabSlice = createSlice({
-  name: 'tab',
-  initialState,
-  reducers: {
-    addTab: (state, action: PayloadAction<Tabs>) => {
-      state.tabs.push(action.payload)
-    },
-    removeTab: (state, action: PayloadAction<Tabs>) => {
-      state.tabs = state.tabs.filter(el => el !== action.payload)
-    },
+	name: 'tab',
+	initialState,
+	reducers: {
+		addTab: (state, action: PayloadAction<ITab>) => {
+			if (!state.tabs.some(el => el.title === action.payload.title))
+				state.tabs.push(action.payload)
+			state.currentTab = action.payload
+		},
+		removeTab: (state, action: PayloadAction<ITab>) => {
+			state.tabs = state.tabs.filter(el => el.title !== action.payload.title)
+		},
 
-    setCurrentTab: (state, action: PayloadAction<Tabs>) => {
-      state.currentTab = action.payload
-    },
-  },
+		setCurrentTab: (state, action: PayloadAction<ITab>) => {
+			state.currentTab = action.payload
+		},
+	},
 })
 
 export const tabReducer = tabSlice.reducer

@@ -16,7 +16,7 @@
 .radio {
 	@apply hidden;
 
-	&:checked+label {
+	&:checked + label {
 		background-color: #2d3748;
 		color: #718096;
 	}
@@ -25,7 +25,7 @@
 .radio__tabs {
 	@apply hidden;
 
-	&:checked+label {
+	&:checked + label {
 		background-color: #2d3748;
 	}
 }
@@ -37,21 +37,33 @@
 	border-left: 1px solid #2d3748;
 	height: 100%;
 	width: 50px;
-	transition: background-color .3s, color .3s;
+	transition: background-color 0.3s, color 0.3s;
 }
 
 .menu {
 	@apply flex;
+	width: 1480px;
+	overflow-x: auto;
+	overflow-y: hidden;
 
-	>li {
+	&::-webkit-scrollbar {
+		background-color: #273346;
+		width: 1px;
+		height: 5px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: #4d658a;
+	}
+
+	> li {
 		@apply flex;
-
 
 		label {
 			@apply flex justify-between items-center gap-3 pl-3 pr-2;
 			cursor: pointer;
 			border-right: 1px solid #2d3748;
-			animation: add .3s ease-in-out;
+			animation: add 0.3s ease-in-out;
 			white-space: nowrap;
 		}
 	}
@@ -60,11 +72,11 @@
 .popup__button {
 	@apply relative flex items-center gap-2 px-3 py-1;
 	cursor: pointer;
-	transition: border-color .3s, background-color .3s, color .3s;
+	transition: border-color 0.3s, background-color 0.3s, color 0.3s;
 }
 
 .arrow__icon {
-	transition: transform .3s;
+	transition: transform 0.3s;
 }
 
 @keyframes add {

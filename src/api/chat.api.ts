@@ -5,9 +5,10 @@ const baseApiWithTags = baseApi.enhanceEndpoints({ addTagTypes: ['Chat'] })
 
 export const chatApi = baseApiWithTags.injectEndpoints({
 	endpoints: build => ({
-		getChats: build.query<Chat[], void>({
-			query: () => ({
+		getChats: build.query<Chat[], { search?: string } | void>({
+			query: params => ({
 				url: 'chat/get/chats',
+				params: { search: params?.search },
 			}),
 			providesTags: [{ type: 'Chat', id: 'LIST' }],
 		}),

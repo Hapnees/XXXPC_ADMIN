@@ -11,9 +11,10 @@ const baseApiWithTags = baseApi.enhanceEndpoints({
 
 const repairApi = baseApiWithTags.injectEndpoints({
 	endpoints: build => ({
-		getUsedRepairCardSlugs: build.query<{ slugs: RepairCardSlug }, void>({
-			query: () => ({
-				url: 'repair/get/card/slugs',
+		getUnusedRepairCardSlugs: build.query<RepairCardSlug[], number | void>({
+			query: repairCardId => ({
+				url: 'repair/get/card/unused-slugs',
+				params: { repairCardId },
 			}),
 		}),
 
@@ -77,7 +78,7 @@ export const {
 	useLazyAdminGetRepairCardsQuery,
 	useAdminUpdateRepairCardMutation,
 	useAdminCreateRepairCardMutation,
-	useAdminGetRepairCardDetailsQuery,
+	useLazyAdminGetRepairCardDetailsQuery,
 	useAdminDeleteRepairCardMutation,
-	useGetUsedRepairCardSlugsQuery,
+	useLazyGetUnusedRepairCardSlugsQuery,
 } = repairApi

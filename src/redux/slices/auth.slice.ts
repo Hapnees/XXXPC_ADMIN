@@ -11,6 +11,7 @@ interface IState {
 	accessToken: string
 	refreshToken: string
 	isNeededRefresh: boolean
+	isUpdatedOnline: boolean
 }
 
 const initialState: IState = {
@@ -18,6 +19,7 @@ const initialState: IState = {
 	refreshToken: '',
 	user: { username: '', avatarPath: '', id: 0, role: Roles.VISITOR },
 	isNeededRefresh: true,
+	isUpdatedOnline: false,
 }
 
 export const authSlice = createSlice({
@@ -48,6 +50,10 @@ export const authSlice = createSlice({
 
 		authSetIsNeeded: (state, action: PayloadAction<boolean>) => {
 			state.isNeededRefresh = action.payload
+		},
+
+		setUpdatedOnline: (state, action: PayloadAction<boolean>) => {
+			state.isUpdatedOnline = action.payload
 		},
 	},
 })

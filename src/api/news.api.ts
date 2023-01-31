@@ -25,9 +25,10 @@ export const newsApi = baseApiWithTags.injectEndpoints({
 			invalidatesTags: [{ type: 'News', id: 'LIST' }],
 		}),
 
-		getNews: build.query<INewsGet[], void>({
-			query: () => ({
+		getNews: build.query<INewsGet[], string | void>({
+			query: search => ({
 				url: 'news/get',
+				params: { search },
 			}),
 			providesTags: [{ type: 'News', id: 'LIST' }],
 		}),

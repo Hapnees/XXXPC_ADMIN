@@ -1,0 +1,102 @@
+.container {
+	@apply flex flex-col;
+	width: 550px;
+	height: 700px;
+	border: 1px solid #38435f;
+	border-radius: 6px;
+	margin-bottom: 15px;
+}
+
+.header {
+	padding: 10px 0;
+	text-align: center;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	border-bottom: 1px solid #38435f;
+	background-color: #232a3a;
+}
+
+.message__list {
+	@apply flex flex-col;
+	font-size: 18px;
+	height: 576px;
+	overflow: auto;
+
+	&::-webkit-scrollbar {
+		background-color: #273346;
+		width: 5px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: #4d658a;
+	}
+}
+
+.message {
+	@apply px-4 py-1 mt-2;
+	max-width: 300px;
+	word-wrap: break-word;
+	border-radius: 6px;
+}
+
+.user__message {
+	@extend .message;
+	background-color: #3a4560;
+}
+
+.master__message {
+	@extend .message;
+	background-color: #252c3d;
+	border: 1px solid #2d3447;
+}
+
+.date {
+	@apply px-2 py-1;
+	font-size: 16px;
+	background-color: #3b5565a4;
+	border-radius: 6px;
+}
+
+.input__message {
+	@apply flex items-center justify-between;
+	padding: 8px;
+	border-top: 1px solid #333d55;
+}
+
+.input {
+	@apply p-2;
+	background-color: #1b202b;
+	border-radius: 6px;
+	resize: none;
+	height: 40px;
+	width: 90%;
+	transition: background-color 0.3s;
+
+	&:focus,
+	&:hover {
+		background-color: #232a3a;
+	}
+}
+
+.icon__send {
+	@apply mr-1 p-2;
+	height: 42px;
+	width: 42px;
+	background-color: #232a3a;
+	border-radius: 100%;
+	cursor: pointer;
+	transition: background-color 0.3s;
+
+	&:hover {
+		background-color: #303a51;
+	}
+}
+
+.button {
+	@apply self-end px-3 py-1;
+	width: 140px;
+	cursor: pointer;
+	border-radius: 6px;
+	background-color: #434e62;
+	transition: background-color 0.3s;
+}

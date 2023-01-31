@@ -14,15 +14,9 @@ export const objectCompare = <T extends object, P extends T>(
 					JSON.stringify(objOld[currentKey]) !==
 					JSON.stringify(objNew[currentKey])
 				) {
-					// console.log(objOld[currentKey])
-					// console.log(objNew[currentKey])
-
 					result.push(currentKey)
 				}
 			} else if (objOld[currentKey] !== objNew[currentKey]) {
-				// console.log(objOld[currentKey])
-				// console.log(objNew[currentKey])
-
 				result.push(currentKey)
 			}
 		}
