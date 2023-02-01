@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AdminFieldsPopup from '@components/AdminFieldsPopup/AdminFieldsPopup'
 import SearchInputWithButton from '@components/SearchInputWithButton/SearchInputWithButton'
 import { CreateButton, DeleteButton } from '@components/UI/Buttons'
@@ -11,18 +11,21 @@ import {
 	sortTitles,
 	sortTitlesView,
 } from './NewModelCreateWindow/NewsModel.interface'
-import { useLazyGetNewsQuery } from '@api/news.api'
+import { useDeleteNewsMutation, useLazyGetNewsQuery } from '@api/news.api'
 import NewsModelRow from './NewModelCreateWindow/NewsModelRow/NewsModelRow'
 import { INewsUpdate } from '@interfaces/news/news-update.interface'
 import { AdminLoader } from '@components/UI'
 import { useAppSelector } from '@hooks/useAppSelector'
-import { useActions } from '@hooks/useActions'
+import { useSearchParams } from 'react-router-dom'
+import customToast from '@utils/customToast'
 
 const NewsModel = () => {
-	const searchRef = useRef<HTMLInputElement>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+	const [searchValue, setSearchValue] = useState('')
 	const [isWaiting, setIsWaiting] = useState(true)
 	const { isUpdatedOnline } = useAppSelector(state => state.auth)
 	const [isOpen, setIsOpen] = useState(false)
+  const [deleteNews] = useDeleteNewsMutation()
 	const [getNews, { data: newsData, isLoading }] = useLazyGetNewsQuery()
 
 	const [currentNews, setCurrentNews] = useState<INewsUpdate | undefined>()
@@ -51,15 +54,23 @@ const NewsModel = () => {
 		setIsOpen(true)
 	}
 
-	const getNewsWithParams = () => {
-		getNews(searchRef.current?.value)
-	}
+  const onClickDelete = () => {
+    if(!checkList.length) return
+
+    deleteNews(checkList).unwrap().then(response => customToast.info(response.message))
+  }
 
 	const onKeyDownEnter = (event: React.KeyboardEvent) => {
 		if (event.key === 'Enter') {
-			getNewsWithParams()
+      searchParams.set('search', searchValue) 
+      setSearchParams(searchParams)
 		}
 	}
+
+  const eventSearch = () => {
+    searchParams.set('search', searchValue) 
+    setSearchParams(searchParams)
+  }
 
 	useEffect(() => {
 		// setCurrentTab(Tabs.NEWS)
@@ -69,12 +80,12 @@ const NewsModel = () => {
 		if (!isUpdatedOnline) return
 
 		setIsWaiting(true)
-		getNews()
+		getNews(searchValue)
 			.unwrap()
 			.then(() => {
 				setIsWaiting(false)
 			})
-	}, [isUpdatedOnline])
+	}, [isUpdatedOnline, searchParams])
 
 	if (isLoading || isWaiting || !isUpdatedOnline) return <AdminLoader />
 
@@ -84,12 +95,13 @@ const NewsModel = () => {
 				<div className='flex items-center gap-2'>
 					<p className='text-[20px]'>Новости</p>
 					<CreateButton onClickCreate={onClickCreate} />
-					<DeleteButton onClickDelete={() => {}} />
+					<DeleteButton onClickDelete={onClickDelete} />
 					<SearchInputWithButton
 						placeholder='По заголовку'
-						searchRef={searchRef}
+						value={searchValue}
+						setValue={setSearchValue}
 						onKeyDown={onKeyDownEnter}
-						getDataWithParams={getNewsWithParams}
+						eventSearch={eventSearch}
 					/>
 					<AdminFieldsPopup
 						ruFields={sortTitlesView}

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react'
+import React, { FC, useCallback, useEffect, useState } from 'react'
 import {
 	useDeleteServicesMutation,
 	useLazyGetServicesQuery,
@@ -25,7 +25,7 @@ import {
 } from './ServiceModel.interface'
 import SearchInputWithButton from '@components/SearchInputWithButton/SearchInputWithButton'
 import { useAppSelector } from '@hooks/useAppSelector'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 
 interface IProps {
 	setCurrentService?: React.Dispatch<
@@ -42,14 +42,16 @@ const ServiceModel: FC<IProps> = ({ toBack }) => {
 	const [isWaiting, setIsWaiting] = useState(true)
 
 	const { isUpdatedOnline } = useAppSelector(state => state.auth)
-	const searchRef = useRef<HTMLInputElement>(null)
+	const [searchValue, setSearchValue] = useState('')
+	const [searchParams, setSearchParams] = useSearchParams()
 
-	const [sortTitle, setSortTitle] = useState<sortTitles>()
-	const [sortDirect, setSortDirect] = useState<SortDirect>()
+	const search = searchParams.get('search')
+  const st = searchParams.get('st') || ''
+  const sd = searchParams.get('sd') || ''
+  const page =  parseInt(searchParams.get('page') || '1')
 
 	const [currentService, setCurrentService] = useState<ServiceGetResponse>()
 	const [isViewCreateWindow, setIsViewCreateWindow] = useState(false)
-	const [currentPage, setCurrentPage] = useState(1)
 
 	const [getServices, { data: serviceData, isLoading }] =
 		useLazyGetServicesQuery()
@@ -57,13 +59,13 @@ const ServiceModel: FC<IProps> = ({ toBack }) => {
 	const getServicesWithParams = useCallback(
 		() =>
 			getServices({
-				search: searchRef.current?.value,
-				st: sortTitlesSend[sortTitle as keyof typeof sortTitlesSend],
-				sd: sortDirect,
+				search: search || '',
+				st: sortTitlesSend[st as keyof typeof sortTitlesSend],
+				sd,
 				id: repairCardId,
-				page: currentPage,
+				page,
 			}),
-		[getServices, currentPage, sortDirect, sortTitle, repairCardId]
+		[getServices, repairCardId, searchParams]
 	)
 
 	const [deleteServices] = useDeleteServicesMutation()
@@ -92,24 +94,34 @@ const ServiceModel: FC<IProps> = ({ toBack }) => {
 
 	const onKeyDownEnter = (event: React.KeyboardEvent) => {
 		if (event.key === 'Enter') {
-			getServicesWithParams()
+			searchParams.set('search', searchValue)
+			setSearchParams(searchParams)
 		}
 	}
 
 	const onClickMenuElement = (title: sortTitles) => {
-		if (title === sortTitle) {
-			setSortTitle(undefined)
-			setSortDirect(undefined)
+		if (title === st) {
+      searchParams.delete('st')
+      searchParams.delete('sd')
+      setSearchParams(searchParams)
 		} else if ([sortTitles.TITLE, sortTitles.PRICES].includes(title)) {
-			setSortTitle(title)
-			setSortDirect(undefined)
+      searchParams.set('st', title)
+      setSearchParams(searchParams)
+      searchParams.delete('sd')
 		}
 	}
 
+  const onClickPage = (page: number) => {
+    searchParams.set('page', page.toString())
+    setSearchParams(searchParams)
+  }
+
 	// Получаем сервисы
 	useEffect(() => {
+
+    setIsWaiting(false)
 		if (
-			(sortTitle !== undefined && sortDirect === undefined) ||
+			(st !== '' && sd === '') ||
 			!isUpdatedOnline
 		)
 			return
@@ -120,7 +132,14 @@ const ServiceModel: FC<IProps> = ({ toBack }) => {
 			.then(() => {
 				setIsWaiting(false)
 			})
-	}, [currentPage, sortDirect, isUpdatedOnline, getServicesWithParams])
+	}, [isUpdatedOnline, searchParams])
+
+  useEffect(() => {
+    if(!search) searchParams.delete('search')
+    if(search && page !== 1) searchParams.set('page', '1')
+
+    setSearchParams(searchParams)
+  }, [searchParams]) 
 
 	if (isLoading || !isUpdatedOnline || isWaiting) return <AdminLoader />
 
@@ -141,9 +160,13 @@ const ServiceModel: FC<IProps> = ({ toBack }) => {
 
 				<SearchInputWithButton
 					placeholder='Поиск по названию'
-					searchRef={searchRef}
+					value={searchValue}
+					setValue={setSearchValue}
 					onKeyDown={onKeyDownEnter}
-					getDataWithParams={getServicesWithParams}
+					eventSearch={() => {
+            searchParams.set('search', searchValue)
+            setSearchParams(searchParams)
+          }}
 				/>
 
 				<AdminFieldsPopup
@@ -165,31 +188,33 @@ const ServiceModel: FC<IProps> = ({ toBack }) => {
 								key={idx}
 								onClick={() => onClickMenuElement(el.title as sortTitles)}
 								style={{
-									backgroundColor: el.title === sortTitle ? '#2d3748' : '',
+									backgroundColor: el.title === st ? '#2d3748' : '',
 								}}
 							>
-								{el.title === sortTitle && (
+								{el.title === st && (
 									<MdOutlineDoubleArrow
 										className={mainCl.arrow__up}
 										style={{
-											opacity: sortDirect === SortDirect.UP ? 1 : '',
+											opacity: sd === SortDirect.UP ? 1 : '',
 										}}
 										onClick={event => {
 											event.stopPropagation()
-											setSortDirect(SortDirect.UP)
+                      searchParams.set('sd', SortDirect.UP)
+                      setSearchParams(searchParams)
 										}}
 									/>
 								)}
 								{sortTitlesView[el.title as keyof typeof sortTitlesView]}
-								{el.title === sortTitle && (
+								{el.title === st && (
 									<MdOutlineDoubleArrow
 										className={mainCl.arrow__down}
 										style={{
-											opacity: sortDirect === SortDirect.DOWN ? 1 : '',
+											opacity: sd === SortDirect.DOWN ? 1 : '',
 										}}
 										onClick={event => {
 											event.stopPropagation()
-											setSortDirect(SortDirect.DOWN)
+                      searchParams.set('sd', SortDirect.DOWN)
+                      setSearchParams(searchParams)
 										}}
 									/>
 								)}
@@ -233,8 +258,8 @@ const ServiceModel: FC<IProps> = ({ toBack }) => {
 
 			<Pagination
 				totalCount={serviceData?.totalCount || 0}
-				currentPage={currentPage}
-				setCurrentPage={setCurrentPage}
+				currentPage={page}
+				setCurrentPage={onClickPage}
 			/>
 		</div>
 	)

@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react'
+import React, { FC, useCallback, useEffect, useState } from 'react'
 import { useLazyGetOrdersQuery, useOrderDeleteMutation } from '@api/order.api'
 import { AdminLoader } from '@components/UI'
 import mainCl from '../tabs.module.scss'
@@ -27,7 +27,7 @@ import { MdOutlineDoubleArrow } from 'react-icons/md'
 import SearchInputWithButton from '@components/SearchInputWithButton/SearchInputWithButton'
 import { useAppSelector } from '@hooks/useAppSelector'
 import ChangeStatusWindow from './ChangeStatusWindow/ChangeStatusWindow'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 
 interface IProps {
 	username?: string
@@ -38,30 +38,32 @@ const OrderModel: FC<IProps> = ({ username, toBack }) => {
 	const params = useParams()
 	const userId = params.userId ? parseInt(params.userId) : undefined
 
+  const [searchParams, setSearchParams] = useSearchParams()
 	const [isWaiting, setIsWaiting] = useState(true)
 	const { isUpdatedOnline } = useAppSelector(state => state.auth)
 
-	const [sortTitle, setSortTitle] = useState<sortTitles>()
-	const [sortDirect, setSortDirect] = useState<SortDirect>()
-	const [filterStatus, setFilterStatus] = useState<OrderStatus>()
-
 	const [isOpenChangeStatus, setIsOpenChangeStatus] = useState(false)
 
-	const [currentPage, setCurrentPage] = useState(1)
-	const searchRef = useRef<HTMLInputElement>(null)
+	const search = searchParams.get('search') || ''
+  const st = searchParams.get('st') || ''
+  const sd = searchParams.get('sd') || ''
+  const fs = searchParams.get('fs') || ''
+  const page =  parseInt(searchParams.get('page') || '1')
+
+	const [searchValue, setSearchValue] = useState('')
 	const [getOrders, { data: ordersData, isLoading }] = useLazyGetOrdersQuery()
 
 	const getOrdersWithParams = useCallback(
 		() =>
 			getOrders({
 				id: userId,
-				search: searchRef.current?.value,
-				st: sortTitlesSend[sortTitle as keyof typeof sortTitlesSend],
-				sd: sortDirect,
-				fs: filterStatus,
-				page: currentPage,
+				search,
+				st: sortTitlesSend[st as keyof typeof sortTitlesSend],
+				sd: sd as SortDirect,
+				fs: fs as OrderStatus,
+				page,
 			}),
-		[getOrders, sortTitle, sortDirect, filterStatus]
+		[getOrders, searchParams]
 	)
 
 	const [deleteOrders] = useOrderDeleteMutation()
@@ -98,33 +100,42 @@ const OrderModel: FC<IProps> = ({ username, toBack }) => {
 
 	const onKeyDownEnter = (event: React.KeyboardEvent) => {
 		if (event.key === 'Enter') {
-			getOrdersWithParams()
+      searchParams.set('search', searchValue)
+      setSearchParams(searchParams)
 		}
 	}
 
 	const onClickMenuElement = (title: sortTitles) => {
-		if (title === sortTitle) {
-			setSortTitle(undefined)
-			setSortDirect(undefined)
+		if (title === st) {
+      searchParams.delete('st')
+      searchParams.delete('sd')
+      setSearchParams(searchParams)
 		} else if (title === sortTitles.PRICE) {
-			setSortTitle(title)
-			setSortDirect(undefined)
+      searchParams.set('st', title)
+      searchParams.delete('sd')
+      setSearchParams(searchParams)
 		} else if (title === sortTitles.STATUS) {
 			setIsOpenChangeStatus(!isOpenChangeStatus)
 		}
 	}
 
-	//
-	useEffect(() => {
-		// setCurrentTab(Tabs.ORDER)
-	}, [])
+  const onClickFilterStatus = (status: OrderStatus | undefined) => {
+    searchParams.set('fs', status || '')
+    setSearchParams(searchParams)
+  }
+
+  const onClickPage = (page: number) => {
+    searchParams.set('page', page.toString())
+    setSearchParams(searchParams)
+  }
 
 	// Получаем заказы
 	useEffect(() => {
 		if (!isUpdatedOnline) return
 
-		if (sortTitle !== undefined && sortDirect === undefined)
-			setSortTitle(undefined)
+		if (st !== '' && sd === ''){
+      return
+    }
 
 		setIsWaiting(true)
 		getOrdersWithParams()
@@ -132,7 +143,7 @@ const OrderModel: FC<IProps> = ({ username, toBack }) => {
 			.then(() => {
 				setIsWaiting(false)
 			})
-	}, [isUpdatedOnline, currentPage, sortDirect, filterStatus])
+	}, [isUpdatedOnline, searchParams])
 
 	if (isLoading || !isUpdatedOnline || isWaiting) return <AdminLoader />
 
@@ -153,9 +164,13 @@ const OrderModel: FC<IProps> = ({ username, toBack }) => {
 
 				<SearchInputWithButton
 					placeholder='Поиск по комментарию'
-					searchRef={searchRef}
+					value={searchValue}
+					setValue={setSearchValue}
 					onKeyDown={onKeyDownEnter}
-					getDataWithParams={getOrdersWithParams}
+					eventSearch={() => {
+            searchParams.set('search', searchValue)
+            setSearchParams(searchParams)
+          }}
 				/>
 
 				<AdminFieldsPopup
@@ -183,29 +198,30 @@ const OrderModel: FC<IProps> = ({ username, toBack }) => {
 								onClick={() => onClickMenuElement(el.title as sortTitles)}
 								style={{
 									backgroundColor:
-										el.title === sortTitle ||
-										(el.title === sortTitles.STATUS && !!filterStatus)
+										el.title === st ||
+										(el.title === sortTitles.STATUS && !! fs)
 											? '#2d3748'
 											: '',
 								}}
 							>
-								{el.title === sortTitle && (
+								{el.title === st && (
 									<MdOutlineDoubleArrow
 										className={mainCl.arrow__up}
 										style={{
-											opacity: sortDirect === SortDirect.UP ? 1 : '',
+											opacity: sd === SortDirect.UP ? 1 : '',
 										}}
 										onClick={event => {
 											event.stopPropagation()
-											setSortDirect(SortDirect.UP)
+                      searchParams.set('sd', SortDirect.UP)
+                      setSearchParams(searchParams)
 										}}
 									/>
 								)}
-								{el.title === sortTitles.STATUS && !!filterStatus ? (
+								{el.title === sortTitles.STATUS && !!fs ? (
 									<p>
 										{
 											OrderStatusView[
-												filterStatus as keyof typeof OrderStatusView
+												fs as keyof typeof OrderStatusView
 											]
 										}
 									</p>
@@ -214,15 +230,16 @@ const OrderModel: FC<IProps> = ({ username, toBack }) => {
 										{sortTitlesView[el.title as keyof typeof sortTitlesView]}
 									</p>
 								)}
-								{el.title === sortTitle && (
+								{el.title === st && (
 									<MdOutlineDoubleArrow
 										className={mainCl.arrow__down}
 										style={{
-											opacity: sortDirect === SortDirect.DOWN ? 1 : '',
+											opacity: sd === SortDirect.DOWN ? 1 : '',
 										}}
 										onClick={event => {
 											event.stopPropagation()
-											setSortDirect(SortDirect.DOWN)
+                      searchParams.set('sd', SortDirect.DOWN)
+                      setSearchParams(searchParams)
 										}}
 									/>
 								)}
@@ -265,8 +282,8 @@ const OrderModel: FC<IProps> = ({ username, toBack }) => {
 			</CSSTransition>
 
 			<Pagination
-				currentPage={currentPage}
-				setCurrentPage={setCurrentPage}
+				currentPage={page}
+				setCurrentPage={onClickPage}
 				totalCount={ordersData?.totalCount || 0}
 			/>
 			<CSSTransition
@@ -277,7 +294,7 @@ const OrderModel: FC<IProps> = ({ username, toBack }) => {
 			>
 				<ModalWindow>
 					<ChangeStatusWindow
-						setStatus={setFilterStatus}
+						setStatus={onClickFilterStatus}
 						toClose={() => setIsOpenChangeStatus(false)}
 					/>
 				</ModalWindow>

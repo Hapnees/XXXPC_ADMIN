@@ -16,6 +16,15 @@ export const newsApi = baseApiWithTags.injectEndpoints({
 			invalidatesTags: [{ type: 'News', id: 'LIST' }],
 		}),
 
+    deleteNews: build.mutation<{message: string}, number[]>({
+      query: ids => ({
+        url: 'news/delete',
+        method: 'DELETE',
+        body: ids
+      }),
+			invalidatesTags: [{ type: 'News', id: 'LIST' }],
+    }),
+
 		updateNews: build.mutation<{ message: string }, INewsUpdate>({
 			query: body => ({
 				url: 'news/update',
@@ -39,4 +48,5 @@ export const {
 	useCreateNewsMutation,
 	useUpdateNewsMutation,
 	useLazyGetNewsQuery,
+  useDeleteNewsMutation
 } = newsApi

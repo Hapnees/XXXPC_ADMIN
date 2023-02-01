@@ -18,6 +18,12 @@ export const tabSlice = createSlice({
 		addTab: (state, action: PayloadAction<ITab>) => {
 			if (!state.tabs.some(el => el.title === action.payload.title))
 				state.tabs.push(action.payload)
+
+			const tmp = state.tabs.map(el => el.title)
+			const index = tmp.indexOf(action.payload.title)
+			if (state.tabs[index].params !== action.payload.params)
+				state.tabs[index].params = action.payload.params
+
 			state.currentTab = action.payload
 		},
 		removeTab: (state, action: PayloadAction<ITab>) => {

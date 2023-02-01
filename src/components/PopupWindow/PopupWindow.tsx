@@ -8,8 +8,6 @@ interface IProps {
 }
 
 const PopupWindow: FC<IProps> = ({ array, ruArray, setFilterValue }) => {
-	// const modSlugs = ['Очистить', ...array]
-
 	const modSlugs = [
 		{ value: undefined, view: 'Очистить' },
 		...array.map((el, idx) => ({ value: el, view: ruArray[idx] })),

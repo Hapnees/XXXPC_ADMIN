@@ -35,7 +35,10 @@ const NewModelCreateWindow: FC<IProps> = ({ toClose, news }) => {
 
 		createNews(currentNews)
 			.unwrap()
-			.then(response => customToast.success(response.message))
+			.then(response => {
+        customToast.success(response.message)
+        toClose()
+      })
 	}
 
 	return (

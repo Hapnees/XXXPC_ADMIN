@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CreateButton, DeleteButton } from '@components/UI/Buttons'
 import { IFieldMenuElement } from '@interfaces/fieldMenuElement.interface'
 import mainCl from '../tabs.module.scss'
@@ -18,14 +18,14 @@ import { useNavigate } from 'react-router-dom'
 const ChatModel = () => {
 	const navigate = useNavigate()
 	const { addTab } = useActions()
-	const searchRef = useRef<HTMLInputElement>(null)
+	const [searchValue, setSearchValue] = useState('')
 	const [isFirst, setIsFirst] = useState(true)
 
 	const { isUpdatedOnline } = useAppSelector(state => state.auth)
 	const [getChats, { data: chatData, isLoading }] = useLazyGetChatsQuery()
 
 	const getChatsWithparams = () => {
-		getChats({ search: searchRef.current?.value })
+		getChats({ search: searchValue })
 	}
 
 	const [checkList, setCheckList] = useState<number[]>([])
@@ -72,10 +72,6 @@ const ChatModel = () => {
 	}
 
 	useEffect(() => {
-		// setCurrentTab(Tabs.CHAT)
-	}, [])
-
-	useEffect(() => {
 		if (!isUpdatedOnline) return
 
 		getChats()
@@ -103,9 +99,10 @@ const ChatModel = () => {
 					<DeleteButton onClickDelete={() => {}} />
 					<SearchInputWithButton
 						placeholder='По имени пользователя'
-						searchRef={searchRef}
+						value={searchValue}
+						setValue={setSearchValue}
 						onKeyDown={onKeyDownEnter}
-						getDataWithParams={getChatsWithparams}
+						eventSearch={getChatsWithparams}
 					/>
 					<AdminFieldsPopup
 						ruFields={sortTitlesView}

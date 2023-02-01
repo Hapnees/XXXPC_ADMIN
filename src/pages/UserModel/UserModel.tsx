@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useHeaders } from '@hooks/useHeaders'
 import { AdminLoader } from '@components/UI'
 import mainCl from '../tabs.module.scss'
@@ -25,18 +25,27 @@ import { CSSTransition } from 'react-transition-group'
 import UserCreateWindow from './UserCreateWindow/UserCreateWindow'
 import ModalWindow from '@components/UI/ModalWindow/ModalWindow'
 import customToast from '@utils/customToast'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useActions } from '@hooks/useActions'
-import { Tabs } from '@interfaces/tabs.interface'
+import { Tabs, TabsUrl } from '@interfaces/tabs.interface'
 
 const UserModel = () => {
-	const navigte = useNavigate()
+	const navigate = useNavigate()
 	const { addTab } = useActions()
 	const [isWaiting, setIsWaiting] = useState(true)
 
+	const location = useLocation()
+	const [searchParams, setSearchParams] = useSearchParams()
+
+	const search = searchParams.get('search') || ''
+	const st = searchParams.get('st')
+	const rf = searchParams.get('rf') || ''
+	const of = searchParams.get('of') || ''
+  const page =  parseInt(searchParams.get('page') || '1')
+
 	const { isUpdatedOnline } = useAppSelector(state => state.auth)
-	const [currentPage, setCurrentPage] = useState(1)
-	const searchRef = useRef<HTMLInputElement>(null)
+
+	const [searchValue, setSearchValue] = useState('')
 	const [deleteUsers] = useDeleteUsersMutation()
 
 	const [isOpenWindow, setIsOpenWindow] = useState(false)
@@ -47,11 +56,6 @@ const UserModel = () => {
 	const [isOpenPopupRoles, setIsOpenPopupRoles] = useState(false)
 	const [isOpenPopupOnline, setIsOpenPopupOnline] = useState(false)
 
-	const [sortTitle, setSortTitle] = useState<sortTitles>(sortTitles.USERNAME)
-	const [roleFilter, setRoleFilter] = useState<Roles>()
-
-	const [onlineFilter, setOnlineFilter] = useState<Online>()
-
 	const [isViewsOrders, setIsViewOrders] = useState(false)
 	const [currentUser, setCurrentUser] = useState<IUserUpdate>()
 
@@ -59,23 +63,19 @@ const UserModel = () => {
 
 	const [getUsers, { data: getUsersData, isLoading }] = useLazyGetUsersQuery()
 
-	const getAndSetUsers = useCallback(
-		() =>
-			getUsers({
-				headers,
-				st: sortTitlesSend[sortTitle as keyof typeof sortTitlesSend],
-				rf: roleFilter,
-				of:
-					onlineFilter === Online.ONLINE
-						? true
-						: onlineFilter === Online.OFFLINE
-						? false
-						: undefined,
-				search: searchRef.current?.value,
-				page: currentPage,
-			}),
-		[getUsers, currentPage, sortTitle, roleFilter, onlineFilter]
-	)
+	const getAndSetUsers = useCallback(() => {
+		return getUsers({
+			headers,
+			st: st
+				? sortTitlesSend[st as keyof typeof sortTitlesSend]
+				: sortTitlesSend.USERNAME,
+			rf,
+			of:
+				of === Online.ONLINE ? true : of === Online.OFFLINE ? false : undefined,
+			search,
+			page,
+		})
+	}, [getUsers, searchParams])
 
 	const [checkFields, setCheckFields] = useState<IFieldMenuElement[]>(
 		Object.keys(sortTitles)
@@ -96,18 +96,19 @@ const UserModel = () => {
 			setIsOpenPopupOnline(!isOpenPopupOnline)
 
 		if (Object.keys(sortTitlesSend).includes(title)) {
-			setSortTitle(title)
+			searchParams.set('st', title)
+			setSearchParams(searchParams)
 		}
 	}
 
 	const getPlaceholder =
-		sortTitle === sortTitles.USERNAME
+		searchParams.get('st') === sortTitles.USERNAME
 			? 'Поиск по имени'
-			: sortTitle === sortTitles.EMAIL
+			: searchParams.get('st') === sortTitles.EMAIL
 			? 'Поиск по почте'
-			: sortTitle === sortTitles.PHONE
+			: searchParams.get('st') === sortTitles.PHONE
 			? 'Поиск по № телефона'
-			: ''
+			: 'Поиск по имени'
 
 	const onClickDelete = () => {
 		if (!checkList.length) return
@@ -117,9 +118,19 @@ const UserModel = () => {
 			.then(response => customToast.success(response.message))
 	}
 
+	const onClickUserOnline = (isOnline: Online) => {
+		searchParams.set('of', isOnline || '')
+		setSearchParams(searchParams)
+	}
+
+	const onClickUserRoles = (role: Roles) => {
+		searchParams.set('rf', role || '')
+		setSearchParams(searchParams)
+	}
+
 	const onClickUserOrders = (user: IUserUpdate) => {
 		const newUrl = `/orders/userId/${user.id}`
-		navigte(newUrl)
+		navigate(newUrl)
 		addTab({
 			title: `${Tabs.USER}/${user.username}/${Tabs.ORDER}`,
 			url: newUrl,
@@ -129,13 +140,35 @@ const UserModel = () => {
 	const onKeyDownEnter = (event: React.KeyboardEvent) => {
 		if (event.key === 'Enter') {
 			event.preventDefault()
-			getAndSetUsers()
+			searchParams.set('search', searchValue)
+			setSearchParams(searchParams)
+			if (!searchValue) {
+				searchParams.delete('st')
+				setSearchParams(searchParams)
+			} else if (!st) {
+				searchParams.set('st', sortTitles.USERNAME)
+				setSearchParams(searchParams)
+			}
 		}
 	}
 
-	// Получаем и сетаем пользователей
+  const onClickPage = (page: number) => {
+    searchParams.set('page', page.toString())
+    setSearchParams(searchParams)
+  }
+
+	useEffect(() => {
+		addTab({
+			title: Tabs.USER,
+			url: TabsUrl[Tabs.USER],
+			params: location.search !== '?search=' ? location.search : '',
+		})
+	}, [location.search])
+
 	useEffect(() => {
 		if (!isUpdatedOnline) return
+
+		setSearchValue(search || '')
 
 		setIsWaiting(true)
 		getAndSetUsers()
@@ -143,7 +176,19 @@ const UserModel = () => {
 			.then(() => {
 				setIsWaiting(false)
 			})
-	}, [isUpdatedOnline, currentPage, sortTitle, roleFilter, onlineFilter])
+	}, [searchParams, isUpdatedOnline])
+
+	useEffect(() => {
+		if (!search) searchParams.delete('search')
+		if (!st) searchParams.delete('st')
+		if (!rf) searchParams.delete('rf')
+		if (!of) searchParams.delete('of')
+    if(search && page !== 1) searchParams.set('page', '1')
+
+    setSearchParams(searchParams)
+
+		setSearchParams(searchParams)
+	}, [searchParams])
 
 	if (isLoading || !isUpdatedOnline || isWaiting) return <AdminLoader />
 
@@ -168,10 +213,14 @@ const UserModel = () => {
 							/>
 							<DeleteButton onClickDelete={onClickDelete} />
 							<SearchInputWithButton
+								value={searchValue}
+								setValue={setSearchValue}
 								placeholder={getPlaceholder}
-								searchRef={searchRef}
 								onKeyDown={onKeyDownEnter}
-								getDataWithParams={getAndSetUsers}
+								eventSearch={() => {
+									searchParams.set('search', searchValue)
+									setSearchParams(searchParams)
+								}}
 							/>
 							<AdminFieldsPopup
 								ruFields={sortTitlesView}
@@ -190,20 +239,20 @@ const UserModel = () => {
 										onClick={() => onClickMenuElement(el.title as sortTitles)}
 										style={{
 											backgroundColor:
-												sortTitle === el.title ||
+												st === el.title ||
 												(el.title === sortTitles.ROLE &&
-													(isOpenPopupRoles || roleFilter)) ||
+													(isOpenPopupRoles || rf)) ||
 												(el.title === sortTitles.ONLINE &&
-													(isOpenPopupOnline || onlineFilter))
+													(isOpenPopupOnline || of))
 													? '#2d3748'
 													: '',
 										}}
 									>
 										<p>
-											{el.title === sortTitles.ROLE && roleFilter
-												? RolesView[roleFilter]
-												: el.title === sortTitles.ONLINE && onlineFilter
-												? OnlineView[onlineFilter]
+											{el.title === sortTitles.ROLE && rf
+												? RolesView[rf as keyof typeof RolesView]
+												: el.title === sortTitles.ONLINE && of
+												? OnlineView[of as keyof typeof OnlineView]
 												: sortTitlesView[
 														el.title as keyof typeof sortTitlesView
 												  ]}
@@ -223,7 +272,7 @@ const UserModel = () => {
 													array={Object.keys(Roles).filter(
 														el => el !== Roles.VISITOR
 													)}
-													setFilterValue={setRoleFilter}
+													setFilterValue={onClickUserRoles}
 												/>
 											</CSSTransition>
 										)}
@@ -240,7 +289,7 @@ const UserModel = () => {
 														el => OnlineView[el as keyof typeof OnlineView]
 													)}
 													array={Object.keys(Online)}
-													setFilterValue={setOnlineFilter}
+													setFilterValue={onClickUserOnline}
 												/>
 											</CSSTransition>
 										)}
@@ -269,8 +318,8 @@ const UserModel = () => {
 
 					<Pagination
 						totalCount={getUsersData?.totalCount || 0}
-						currentPage={currentPage}
-						setCurrentPage={setCurrentPage}
+						currentPage={page}
+						setCurrentPage={onClickPage}
 					/>
 					<CSSTransition
 						in={isOpenWindow}

@@ -5,9 +5,9 @@ import { CSSTransition } from 'react-transition-group'
 import { useAuth, useAppSelector, useActions } from '@hooks/index'
 import { Roles } from '@interfaces/roles.interface'
 import { HiPlus } from 'react-icons/hi'
-import { ITab, Tabs, TabsUrl } from '@interfaces/tabs.interface'
+import { ITab, Tabs } from '@interfaces/tabs.interface'
 import { IoClose } from 'react-icons/io5'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import cl from './Header.module.scss'
 import { tabTitleFormat } from '@utils/tab-title.formatter'
 
@@ -24,6 +24,7 @@ const Header = () => {
 	const navigate = useNavigate()
 
 	const onClose = (event: React.MouseEvent, tab: ITab) => {
+		event.preventDefault()
 		event.stopPropagation()
 
 		removeTab(tab)
@@ -33,7 +34,7 @@ const Header = () => {
 				? index >= 1
 					? tabs[index - 1]
 					: tabs[index + 1]
-				: { title: Tabs.MODELS, url: TabsUrl[Tabs.MODELS] }
+				: { title: Tabs.MODELS, url: '/' }
 
 		setCurrentTab(nextTab)
 		navigate(nextTab.url)
@@ -45,45 +46,57 @@ const Header = () => {
 				<p className={cl.title}>админ панель</p>
 
 				<div className='flex grow'>
-					<div className='h-full flex items-center'>
-						<input
-							type='radio'
-							id='plus'
-							name='tabs'
-							className={cl.radio}
-							checked={currentTab.title === Tabs.MODELS}
-							onChange={() => {
-								setCurrentTab({ title: Tabs.MODELS, url: TabsUrl[Tabs.MODELS] })
-								navigate(TabsUrl[Tabs.MODELS])
+					<div
+						className='h-full flex items-center'
+						style={{
+							backgroundColor:
+								currentTab.title === Tabs.MODELS ? '#2d3748' : '',
+						}}
+					>
+						<Link
+							to='/'
+							onClick={() => {
+								setCurrentTab({ title: Tabs.MODELS, url: '/' })
 							}}
-						/>
-						<label htmlFor='plus'>
+						>
 							<HiPlus className={cl.plus} />
-						</label>
+						</Link>
 					</div>
 
 					<ul className={cl.menu}>
 						{tabs.map(tab => (
 							<li key={tab.title}>
-								<input
-									type='radio'
-									id={tab.title}
-									name='tabs'
-									className={cl.radio__tabs}
-									checked={currentTab.title === tab.title}
-									onChange={() => {
-										setCurrentTab({ title: tab.title, url: tab.url })
-										navigate(tab.url)
+								<Link
+									to={{
+										pathname: tab.url,
+										search: tab.params ? `${tab.params}` : '',
 									}}
-								/>
-								<label htmlFor={tab.title}>
-									<p>{tabTitleFormat(tab.title)}</p>
-									<IoClose
-										className='p-1'
-										size={30}
-										onClick={event => onClose(event, tab)}
-									/>
-								</label>
+									className={cl.tab__link}
+									onClick={() => {
+										setCurrentTab({
+											title: tab.title,
+											url: tab.url,
+											params: tab.params,
+										})
+									}}
+								>
+									<div
+										className={cl.tab}
+										style={{
+											backgroundColor:
+												currentTab.title === tab.title ? '#2d3748' : '',
+										}}
+									>
+										<p className='whitespace-nowrap'>
+											{tabTitleFormat(tab.title)}
+										</p>
+										<IoClose
+											className='p-1'
+											size={30}
+											onClick={event => onClose(event, tab)}
+										/>
+									</div>
+								</Link>
 							</li>
 						))}
 					</ul>

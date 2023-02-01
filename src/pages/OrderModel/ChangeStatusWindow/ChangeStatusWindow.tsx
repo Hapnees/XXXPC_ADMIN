@@ -4,7 +4,7 @@ import { IoClose } from 'react-icons/io5'
 import cl from './ChangeStatusWindow.module.scss'
 
 interface IProps {
-  setStatus: React.Dispatch<SetStateAction<OrderStatus | undefined>>
+  setStatus: (status: OrderStatus | undefined) => void
   toClose: () => void
 }
 

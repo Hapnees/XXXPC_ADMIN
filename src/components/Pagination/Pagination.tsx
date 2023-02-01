@@ -5,7 +5,7 @@ interface IProps {
 	limit?: number
 	totalCount: number
 	currentPage: number
-	setCurrentPage: React.Dispatch<SetStateAction<number>>
+	setCurrentPage: (page: number) => void
 }
 
 const Pagination: FC<IProps> = ({

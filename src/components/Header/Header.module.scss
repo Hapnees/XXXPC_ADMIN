@@ -13,21 +13,10 @@
 	font-size: 25px;
 }
 
-.radio {
-	@apply hidden;
-
-	&:checked + label {
-		background-color: #2d3748;
-		color: #718096;
-	}
-}
-
-.radio__tabs {
-	@apply hidden;
-
-	&:checked + label {
-		background-color: #2d3748;
-	}
+.tab {
+	@apply flex items-center gap-2 px-3 h-full;
+	transition: background-color 0.3s;
+	animation: add 0.3s ease-in-out;
 }
 
 .plus {

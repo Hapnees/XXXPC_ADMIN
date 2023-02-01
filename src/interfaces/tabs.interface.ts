@@ -41,4 +41,5 @@ export enum TabsUrl {
 export interface ITab {
 	title: string
 	url: string
+	params?: string
 }

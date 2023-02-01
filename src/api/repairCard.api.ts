@@ -38,6 +38,7 @@ const repairApi = baseApiWithTags.injectEndpoints({
 			{
 				data: RepairCardsGetResponse[]
 				totalCount: number
+				usedSlugs: string[]
 			},
 			{ search?: string; fs?: RepairCardSlug; limit?: number; page?: number }
 		>({

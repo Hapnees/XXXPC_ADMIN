@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
 	useAdminDeleteRepairCardMutation,
 	useLazyAdminGetRepairCardsQuery,
@@ -6,15 +6,11 @@ import {
 import { AdminLoader } from '@components/UI/index'
 import mainCl from '../tabs.module.scss'
 import RepairCardModelRow from './RepairCardModelRow/RepairCardModelRow'
-import RepairCardCreate from './RepairCardCreate/RepairCardCreate'
-import { RepairCardsGetResponse } from '@interfaces/repair-card'
 import { CreateButton, DeleteButton } from '@components/UI/Buttons'
 import {
 	RepairCardSlug,
 	RepairCardSlugView,
 } from '@interfaces/repair-card/repair-card-slug.enum'
-import SpecialInput from '@components/UI/AdminSpecialInput/SpecialInput'
-import { HiSearch } from 'react-icons/hi'
 import customToast from '@utils/customToast'
 import { IFieldMenuElement } from '@interfaces/fieldMenuElement.interface'
 import Pagination from '@components/Pagination/Pagination'
@@ -25,7 +21,8 @@ import { CSSTransition } from 'react-transition-group'
 import { useAppSelector } from '@hooks/useAppSelector'
 import { useActions } from '@hooks/useActions'
 import { Tabs } from '@interfaces/tabs.interface'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import SearchInputWithButton from '@components/SearchInputWithButton/SearchInputWithButton'
 
 export enum CurrentWindowRCM {
 	LIST = 'LIST',
@@ -33,35 +30,21 @@ export enum CurrentWindowRCM {
 	CREATE_SERVICE = 'CREATE_SERVICE',
 }
 
-// const selectData = [
-// 	{ value: RepairCardSlug.PC, label: RepairCardSlugView.PC },
-// 	{ value: RepairCardSlug.LAPTOP, label: RepairCardSlugView.LAPTOP },
-// 	{ value: RepairCardSlug.PHONE, label: RepairCardSlugView.PHONE },
-// 	{
-// 		value: RepairCardSlug.RESTORE_DATA,
-// 		label: RepairCardSlugView.RESTORE_DATA,
-// 	},
-// 	{ value: RepairCardSlug.SERVER, label: RepairCardSlugView.SERVER },
-// 	{ value: RepairCardSlug.TABLET, label: RepairCardSlugView.TABLET },
-// 	{ value: RepairCardSlug.TV, label: RepairCardSlugView.TV },
-// 	{ value: RepairCardSlug.MONITOR, label: RepairCardSlugView.MONITOR },
-// 	{ value: RepairCardSlug.GPS, label: RepairCardSlugView.GPS },
-// 	{ value: RepairCardSlug.MONOBLOCK, label: RepairCardSlugView.MONOBLOCK },
-// 	{ value: RepairCardSlug.HDD, label: RepairCardSlugView.HDD },
-// 	{ value: RepairCardSlug.SOFTWARE, label: RepairCardSlugView.SOFTWARE },
-// ]
-
 const RepairCardModel = () => {
 	const navigate = useNavigate()
 	const { addTab } = useActions()
 	const [isWaiting, setIsWaiting] = useState(true)
 
+	const [searchParams, setSearchParams] = useSearchParams()
+
 	const { isUpdatedOnline } = useAppSelector(state => state.auth)
 	const [isOpenPopup, setIsOpenPopup] = useState(false)
-	const [filterSlug, setFilterSlug] = useState<RepairCardSlug>()
 
-	const [currentPage, setCurrentPage] = useState(1)
-	const searchRef = useRef<HTMLInputElement>(null)
+	const search = searchParams.get('search')
+	const fs = searchParams.get('fs') || ''
+  const page =  parseInt(searchParams.get('page') || '1')
+
+	const [searchValue, setSearchValue] = useState('')
 	const [checkList, setCheckList] = useState<number[]>([])
 
 	const [deleteCard] = useAdminDeleteRepairCardMutation()
@@ -72,14 +55,14 @@ const RepairCardModel = () => {
 	const getRepairCardsWithParams = useCallback(
 		() =>
 			getRepairCards({
-				search: searchRef.current?.value,
-				fs: filterSlug,
-				page: currentPage,
+				search: search || '',
+				fs: fs as RepairCardSlug,
+				page,
 			}),
-		[getRepairCards, filterSlug, currentPage]
+		[getRepairCards, searchParams]
 	)
 
-	const slugs = cardsData?.data.map(el => el.slug)
+	const slugs = cardsData?.usedSlugs || []
 
 	const [checkFields, setCheckFields] = useState<IFieldMenuElement[]>(
 		Object.keys(sortTitles)
@@ -108,6 +91,11 @@ const RepairCardModel = () => {
 			.then(response => customToast.success(response.message))
 	}
 
+  const onClickPage = (page: number) => {
+    searchParams.set('page', page.toString())
+    setSearchParams(searchParams)
+  }
+
 	// Получаем данные о карточках
 	useEffect(() => {
 		if (!isUpdatedOnline) return
@@ -118,14 +106,27 @@ const RepairCardModel = () => {
 			.then(() => {
 				setIsWaiting(false)
 			})
-	}, [currentPage, filterSlug, isUpdatedOnline])
+	}, [isUpdatedOnline, searchParams])
+
+	const onClickFilterSlug = (slug: RepairCardSlug) => {
+		searchParams.set('fs', slug || '')
+		setSearchParams(searchParams)
+	}
 
 	const onKeyDownEnter = (event: React.KeyboardEvent) => {
 		if (event.key === 'Enter') {
 			event.preventDefault()
-			getRepairCardsWithParams()
+			searchParams.set('search', searchValue)
+			setSearchParams(searchParams)
 		}
 	}
+
+	useEffect(() => {
+		if (!search) searchParams.delete('search')
+		if (!fs) searchParams.delete('fs')
+
+		setSearchParams(searchParams)
+	}, [searchParams])
 
 	return (
 		<>
@@ -141,20 +142,17 @@ const RepairCardModel = () => {
 						</div>
 						<div className='flex items-center gap-2'>
 							<div className='w-[400px]'>
-								<SpecialInput
+								<SearchInputWithButton
+									value={searchValue}
 									placeholder='Поиск по названию'
-									ref={searchRef}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-										if (searchRef.current?.value)
-											searchRef.current.value = event.target.value
+									setValue={setSearchValue}
+									onKeyDown={onKeyDownEnter}
+									eventSearch={() => {
+										searchParams.set('search', searchValue)
+										setSearchParams(searchParams)
 									}}
-									onKeyDown={event => onKeyDownEnter(event)}
 								/>
 							</div>
-							<HiSearch
-								className='bg-[#434e62] w-[70px] h-[35px] p-1 rounded-md cursor-pointer'
-								onClick={getRepairCardsWithParams}
-							/>
 						</div>
 						<AdminFieldsPopup
 							ruFields={sortTitlesView}
@@ -171,8 +169,7 @@ const RepairCardModel = () => {
 										key={idx}
 										style={{
 											backgroundColor:
-												el.title === sortTitles.CATEGORY &&
-												(isOpenPopup || filterSlug)
+												el.title === sortTitles.CATEGORY && (isOpenPopup || fs)
 													? '#2d3748'
 													: '',
 										}}
@@ -182,8 +179,10 @@ const RepairCardModel = () => {
 										}
 									>
 										<p className='overflow-hidden text-ellipsis'>
-											{el.title === sortTitles.CATEGORY && filterSlug
-												? RepairCardSlugView[filterSlug]
+											{el.title === sortTitles.CATEGORY && fs
+												? RepairCardSlugView[
+														fs as keyof typeof RepairCardSlugView
+												  ]
 												: sortTitlesView[
 														el.title as keyof typeof sortTitlesView
 												  ]}
@@ -198,10 +197,15 @@ const RepairCardModel = () => {
 											>
 												<PopupWindow
 													ruArray={
-														slugs?.map(el => RepairCardSlugView[el]) || []
+														slugs?.map(
+															el =>
+																RepairCardSlugView[
+																	el as keyof typeof RepairCardSlugView
+																]
+														) || []
 													}
 													array={slugs || []}
-													setFilterValue={setFilterSlug}
+													setFilterValue={onClickFilterSlug}
 												/>
 											</CSSTransition>
 										)}
@@ -223,8 +227,8 @@ const RepairCardModel = () => {
 					</div>
 
 					<Pagination
-						currentPage={currentPage}
-						setCurrentPage={setCurrentPage}
+						currentPage={page}
+						setCurrentPage={onClickPage}
 						totalCount={cardsData?.totalCount || 0}
 					/>
 				</div>
